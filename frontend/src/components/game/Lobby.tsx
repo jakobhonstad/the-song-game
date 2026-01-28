@@ -63,10 +63,9 @@ export default function Lobby({ game, gameCode }: LobbyProps) {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-8 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600">
-      <div className="max-w-2xl w-full bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-8 md:p-12 text-white">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Spill Lobby</h1>
+    <div className="max-w-2xl w-full bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-8 md:p-12 text-white">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold mb-4">Spill Lobby</h1>
           
           <div className="inline-block bg-white/20 rounded-xl p-4 mb-4">
             <div className="text-sm text-white/70 mb-1">Spillkode</div>
@@ -139,6 +138,6 @@ export default function Lobby({ game, gameCode }: LobbyProps) {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

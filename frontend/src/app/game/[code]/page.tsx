@@ -82,33 +82,55 @@ export default function GamePage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600">
-        <div className="text-white text-2xl">Laster spill...</div>
-      </main>
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 overflow-hidden">
+        <a href="/" className="fixed top-4 left-4 z-50 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white/80 hover:text-white text-sm transition-colors">
+          ← Hjem
+        </a>
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-white text-2xl">Laster spill...</div>
+        </main>
+      </div>
     );
   }
 
   if (error || !initializedGame) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600">
-        <div className="text-white text-center">
-          <div className="text-2xl mb-4">{error || 'Spill ikke funnet'}</div>
-          <a href="/" className="text-white/70 hover:text-white">← Tilbake til forsiden</a>
-        </div>
-      </main>
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 overflow-hidden">
+        <a href="/" className="fixed top-4 left-4 z-50 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white/80 hover:text-white text-sm transition-colors">
+          ← Hjem
+        </a>
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-white text-center">
+            <div className="text-2xl mb-4">{error || 'Spill ikke funnet'}</div>
+          </div>
+        </main>
+      </div>
     );
   }
 
-  // Render different components based on game status
-  switch (initializedGame.status) {
-    case 'WAITING':
-      return <Lobby game={initializedGame} gameCode={gameCode} />;
-    case 'PLAYING':
-    case 'ROUND_END':
-      return <GamePlay game={initializedGame} gameCode={gameCode} />;
-    case 'FINISHED':
-      return <GameResults game={initializedGame} />;
-    default:
-      return null;
-  }
+  // Render different components based on game status with home button
+  const renderContent = () => {
+    switch (initializedGame.status) {
+      case 'WAITING':
+        return <Lobby game={initializedGame} gameCode={gameCode} />;
+      case 'PLAYING':
+      case 'ROUND_END':
+        return <GamePlay game={initializedGame} gameCode={gameCode} />;
+      case 'FINISHED':
+        return <GameResults game={initializedGame} />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 overflow-hidden">
+      <a href="/" className="fixed top-4 left-4 z-50 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white/80 hover:text-white text-sm transition-colors">
+        ← Hjem
+      </a>
+      <div className="flex-1 flex items-center justify-center p-8">
+        {renderContent()}
+      </div>
+    </div>
+  );
 }

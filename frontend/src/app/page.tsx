@@ -2,7 +2,15 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-8 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600">
+    <main className="min-h-screen flex flex-col items-center justify-center p-8 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 overflow-hidden">
+      <div className="fixed top-4 left-4 z-50">
+        <Link
+          href="/"
+          className="inline-block px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white/80 hover:text-white text-sm transition-colors"
+        >
+          ← Hjem
+        </Link>
+      </div>
       <div className="max-w-2xl w-full bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-8 md:p-12 text-white">
         <div className="text-center space-y-6">
           <h1 className="text-6xl md:text-7xl font-bold mb-4 animate-pulse-slow">

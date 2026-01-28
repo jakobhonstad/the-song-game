@@ -11,86 +11,79 @@ datasource db {
 }
 
 model Game {
-  id          String   @id @default(cuid())
-  code        String   @unique
-  category    String
-  status      GameStatus @default(WAITING)
-  hostId      String?
-  currentRound Int     @default(0)
-  maxRounds   Int      @default(10)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  players     Player[]
-  rounds      Round[]
-  
+  id            String    @id @default(cuid())
+  code          String    @unique
+  hostId        String
+  status        String    @default("LOBBY") // LOBBY, PLAYING, ROUND_END, FINISHED
+  category      String    @default("film")
+  maxRounds     Int       @default(10)
+  currentRound  Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  players       Player[]
+  rounds        Round[]
+
   @@index([code])
 }
 
 model Player {
-  id        String   @id @default(cuid())
-  gameId    String
-  name      String
-  score     Int      @default(0)
-  isHost    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  
-  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  answers   Answer[]
-  
+  id            String    @id @default(cuid())
+  gameId        String
+  name          String
+  isHost        Boolean   @default(false)
+  score         Int       @default(0)
+  createdAt     DateTime  @default(now())
+
+  game          Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  answers       Answer[]
+
   @@index([gameId])
+  @@unique([gameId, name])
 }
 
 model Round {
-  id          String   @id @default(cuid())
-  gameId      String
-  roundNumber Int
-  songId      String
-  songTitle   String
-  songArtist  String?
-  audioUrl    String?
-  startedAt   DateTime @default(now())
-  endedAt     DateTime?
-  
-  game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  answers     Answer[]
-  
-  @@unique([gameId, roundNumber])
+  id            String    @id @default(cuid())
+  gameId        String
+  roundNumber   Int
+  songId        String
+  songTitle     String
+  songArtist    String?
+  category      String
+  createdAt     DateTime  @default(now())
+
+  game          Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  answers       Answer[]
+
   @@index([gameId])
+  @@unique([gameId, roundNumber])
 }
 
 model Answer {
-  id          String   @id @default(cuid())
-  roundId     String
-  playerId    String
-  guess       String
-  isCorrect   Boolean  @default(false)
-  points      Int      @default(0)
-  submittedAt DateTime @default(now())
-  
-  round       Round    @relation(fields: [roundId], references: [id], onDelete: Cascade)
-  player      Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  
-  @@unique([roundId, playerId])
+  id            String    @id @default(cuid())
+  roundId       String
+  playerId      String
+  guess         String
+  isCorrect     Boolean   @default(false)
+  points        Int       @default(0)
+  timeElapsed   Int       // in milliseconds
+  createdAt     DateTime  @default(now())
+
+  round         Round     @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  player        Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
   @@index([roundId])
   @@index([playerId])
+  @@unique([roundId, playerId])
 }
 
 model Song {
-  id        String   @id @default(cuid())
-  title     String
-  artist    String?
-  category  String
-  audioUrl  String?
-  imageUrl  String?
-  createdAt DateTime @default(now())
-  
-  @@index([category])
-}
+  id            String    @id @default(cuid())
+  title         String    @unique
+  artist        String
+  category      String
+  createdAt     DateTime  @default(now())
 
-enum GameStatus {
-  WAITING
-  PLAYING
-  ROUND_END
-  FINISHED
+  @@index([category])
+  @@index([title])
 }
