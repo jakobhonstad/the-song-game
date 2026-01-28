@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Game {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  category    String
+  status      GameStatus @default(WAITING)
+  hostId      String?
+  currentRound Int     @default(0)
+  maxRounds   Int      @default(10)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  players     Player[]
+  rounds      Round[]
+  
+  @@index([code])
+}
+
+model Player {
+  id        String   @id @default(cuid())
+  gameId    String
+  name      String
+  score     Int      @default(0)
+  isHost    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  answers   Answer[]
+  
+  @@index([gameId])
+}
+
+model Round {
+  id          String   @id @default(cuid())
+  gameId      String
+  roundNumber Int
+  songId      String
+  songTitle   String
+  songArtist  String?
+  audioUrl    String?
+  startedAt   DateTime @default(now())
+  endedAt     DateTime?
+  
+  game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  answers     Answer[]
+  
+  @@unique([gameId, roundNumber])
+  @@index([gameId])
+}
+
+model Answer {
+  id          String   @id @default(cuid())
+  roundId     String
+  playerId    String
+  guess       String
+  isCorrect   Boolean  @default(false)
+  points      Int      @default(0)
+  submittedAt DateTime @default(now())
+  
+  round       Round    @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  player      Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  
+  @@unique([roundId, playerId])
+  @@index([roundId])
+  @@index([playerId])
+}
+
+model Song {
+  id        String   @id @default(cuid())
+  title     String
+  artist    String?
+  category  String
+  audioUrl  String?
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  
+  @@index([category])
+}
+
+enum GameStatus {
+  WAITING
+  PLAYING
+  ROUND_END
+  FINISHED
+}

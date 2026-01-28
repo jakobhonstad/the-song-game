@@ -1,0 +1,3 @@
+# Ignore Tailwind CSS directives
+*.css
+node_modules/
