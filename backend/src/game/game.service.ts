@@ -161,15 +161,15 @@ export class GameService {
     // For film category: check against movie name
     // For tv category: check against TV show name  
     if (round.category === 'film' || round.category === 'tv') {
-      const song = await this.prisma.song.findFirst({ 
-        where: { title: round.songTitle } 
+      const song = await this.prisma.song.findUnique({ 
+        where: { id: round.songId } 
       });
       
       if (song) {
         if (round.category === 'film' && song.movie) {
-          correctAnswer = song.movie;
+          correctAnswer = song.movie!;
         } else if (round.category === 'tv' && song.tvShow) {
-          correctAnswer = song.tvShow;
+          correctAnswer = song.tvShow!;
         }
       }
     }
