@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { DatabaseService } from '../database/database.service';
 import { CreateGameDto, JoinGameDto } from './dto/game.dto';
 
 function generateGameCode(): string {
@@ -15,7 +15,7 @@ function calculatePoints(timeElapsed: number, isCorrect: boolean): number {
 
 @Injectable()
 export class GameService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: DatabaseService) {}
 
   async createGame(createGameDto: CreateGameDto, hostId: string) {
     const code = generateGameCode();
