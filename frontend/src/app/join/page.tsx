@@ -31,7 +31,8 @@ export default function JoinGame() {
       }
 
       const data = await response.json();
-      const playerId = data.player.id;
+      // Backend returns the game object directly, find the current player
+      const playerId = data.players.find((p: any) => p.name === playerName)?.id;
 
       // Store player info in localStorage
       localStorage.setItem('playerId', playerId);

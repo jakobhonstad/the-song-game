@@ -54,8 +54,11 @@ export default function GamePage() {
         // Set the initialized game to local state
         setInitializedGame(currentGame);
         
-        // Connect to WebSocket
-        connectWebSocket(gameCode, playerId);
+        // Connect to WebSocket (don't await to avoid blocking)
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        connectWebSocket(gameCode, playerId).catch((err: Error) => {
+          console.error('WebSocket connection error:', err);
+        });
         
         setLoading(false);
       } catch (err) {
@@ -75,7 +78,7 @@ export default function GamePage() {
 
   // Update local game state when store game changes
   useEffect(() => {
-    if (game && game.code === gameCode) {
+    if (game?.code === gameCode) {
       setInitializedGame(game);
     }
   }, [game, gameCode]);
@@ -111,7 +114,7 @@ export default function GamePage() {
   // Render different components based on game status with home button
   const renderContent = () => {
     switch (initializedGame.status) {
-      case 'WAITING':
+      case 'LOBBY':
         return <Lobby game={initializedGame} gameCode={gameCode} />;
       case 'PLAYING':
       case 'ROUND_END':

@@ -31,6 +31,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('join-game')
   async handleJoinGame(@MessageBody() data: { gameCode: string }, @ConnectedSocket() client: Socket) {
     const { gameCode } = data;
+    console.log(`📡 [join-game] Client ${client.id} joining game: ${gameCode}`);
     
     // Add client to game room
     const roomName = `game-${gameCode}`;
@@ -45,9 +46,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Get current game state
     const game = await this.gameService.getGame(gameCode);
+    console.log(`📡 [join-game] Game retrieved:`, { code: game?.code, hasPlayers: !!game?.players });
     if (game) {
+      // Send confirmation to the client that just joined
+      console.log(`📡 [join-game] Emitting 'joined-game' to client ${client.id}`);
+      client.emit('joined-game', game);
       // Broadcast to all players in game that someone joined
-      this.broadcastToGame(gameCode, 'player-joined', { game });
+      console.log(`📡 [join-game] Broadcasting 'player-joined' to all in room ${roomName}`);
+      this.broadcastToGame(gameCode, 'player-joined', game);
     }
   }
 
@@ -56,7 +62,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const { gameCode } = data;
     const game = await this.gameService.getGame(gameCode);
     if (game) {
-      this.broadcastToGame(gameCode, 'game-started', { game });
+      this.broadcastToGame(gameCode, 'game-started', { game, round: game.rounds?.[0] });
     }
   }
 
@@ -89,5 +95,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         client.emit(event, data);
       });
     }
+  }
+
+  // Public method for controller to broadcast events
+  broadcastToGamePublic(gameCode: string, event: string, data: any) {
+    this.broadcastToGame(gameCode, event, data);
   }
 }

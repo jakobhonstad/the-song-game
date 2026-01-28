@@ -1,17 +1,18 @@
 import { create } from 'zustand';
+import type { Socket } from 'socket.io-client';
 import type { Game, Round, WebSocketMessage } from '@/types/game';
 
 interface GameState {
   game: Game | null;
   currentRound: Round | null;
-  ws: WebSocket | null;
+  socket: Socket | null;
   isConnected: boolean;
   
   // Actions
   setGame: (game: Game) => void;
   setCurrentRound: (round: Round | null) => void;
   updatePlayers: (players: any[]) => void;
-  connectWebSocket: (gameCode: string, playerId: string) => void;
+  connectWebSocket: (gameCode: string, playerId: string) => Promise<void>;
   disconnectWebSocket: () => void;
   sendMessage: (message: WebSocketMessage) => void;
   fetchGame: (gameCode: string) => Promise<void>;
@@ -20,7 +21,7 @@ interface GameState {
 export const useGameStore = create<GameState>((set, get) => ({
   game: null,
   currentRound: null,
-  ws: null,
+  socket: null,
   isConnected: false,
 
   setGame: (game) => set({ game }),
@@ -35,101 +36,133 @@ export const useGameStore = create<GameState>((set, get) => ({
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/games/${gameCode}`);
       if (!response.ok) throw new Error('Game not found');
-      const data = await response.json();
-      set({ game: data.game });
+      const game = await response.json();
+      set({ game });
     } catch (error) {
       console.error('Error fetching game:', error);
       throw error;
     }
   },
 
-  connectWebSocket: (gameCode: string, playerId: string) => {
-    const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL}/ws`);
+  connectWebSocket: async (gameCode: string, playerId: string) => {
+    // Only run on client-side
+    if (typeof window === 'undefined') {
+      console.log('Skipping WebSocket connection on server-side');
+      return;
+    }
 
-    ws.onopen = () => {
-      console.log('WebSocket connected');
-      set({ isConnected: true });
+    try {
+      // Dynamic import to avoid SSR issues
+      const { io } = await import('socket.io-client');
       
-      // Send join message
-      ws.send(JSON.stringify({
-        type: 'join-game',
-        gameCode,
-        playerId,
-      }));
-    };
+      const socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001', {
+        transports: ['websocket'],
+        reconnection: true,
+      });
 
-    ws.onmessage = (event) => {
-      const message: WebSocketMessage = JSON.parse(event.data);
-      console.log('WebSocket message:', message);
+      socket.on('connect', () => {
+        console.log('Socket.IO connected');
+        set({ isConnected: true });
+        
+        // Send join message
+        socket.emit('join-game', { gameCode, playerId });
+      });
 
-      switch (message.type) {
-        case 'joined-game':
-          set({ game: message.game });
-          break;
-          
-        case 'player-joined':
-          console.log('🎮 Player joined - updating game:', message.game);
-          set({ game: message.game });
-          break;
-          
-        case 'game-started':
+      socket.on('joined-game', (game) => {
+        console.log('✅ joined-game event received:', { game, hasCode: game?.code, code: game?.code });
+        if (game && game.code) {
+          set({ game });
+        } else {
+          console.warn('⚠️ joined-game: game or code undefined', game);
+        }
+      });
+
+      socket.on('player-joined', (game) => {
+        console.log('✅ player-joined event received:', { game, hasCode: game?.code });
+        if (game && game.code) {
+          set({ game });
+        } else {
+          console.warn('⚠️ player-joined: game or code undefined', game);
+        }
+      });
+
+      socket.on('game-started', (data) => {
+        console.log('✅ game-started event received:', data);
+        // Backend sends either { game, round } or just game directly
+        const game = data.game || data;
+        let round = data.round;
+        
+        // If no explicit round, get first round from game.rounds
+        if (!round && game.rounds && game.rounds.length > 0) {
+          round = game.rounds[0];
+          console.log('✅ [game-started] Got round from game.rounds[0]');
+        }
+        
+        console.log('✅ [game-started] Setting game:', { code: game?.code, status: game?.status, roundsCount: game?.rounds?.length });
+        console.log('✅ [game-started] Setting round:', { roundNumber: round?.roundNumber, songTitle: round?.songTitle });
+        
+        if (game && game.code) {
           set({ 
-            game: message.game,
-            currentRound: message.round,
+            game,
+            currentRound: round || null,
           });
-          break;
-          
-        case 'next-round':
-          set({ currentRound: message.round });
-          break;
-          
-        case 'round-end':
-          set((state: any) => ({ 
-            game: state.game ? { ...state.game, players: message.players } : null,
-            currentRound: message.round,
-          }));
-          break;
-          
-        case 'game-finished':
-          set((state) => ({
-            game: state.game ? { 
-              ...state.game, 
-              status: 'FINISHED',
-              players: message.leaderboard,
-            } : null,
-          }));
-          break;
-          
-        case 'error':
-          console.error('WebSocket error:', message.message);
-          break;
-      }
-    };
+        } else {
+          console.warn('⚠️ game-started: missing game or code', data);
+        }
+      });
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
+      socket.on('next-round', (data) => {
+        console.log('Next round:', data);
+        set({ currentRound: data.round });
+      });
 
-    ws.onclose = () => {
-      console.log('WebSocket disconnected');
-      set({ isConnected: false });
-    };
+      socket.on('round-end', (data) => {
+        console.log('Round ended:', data);
+        set((state: any) => ({ 
+          game: state.game ? { ...state.game, players: data.players } : null,
+          currentRound: data.round,
+        }));
+      });
 
-    set({ ws });
+      socket.on('game-finished', (data) => {
+        console.log('Game finished:', data);
+        set((state) => ({
+          game: state.game ? { 
+            ...state.game, 
+            status: 'FINISHED',
+            players: data.leaderboard,
+          } : null,
+        }));
+      });
+
+      socket.on('error', (data) => {
+        console.error('Socket error:', data);
+      });
+
+      socket.on('disconnect', () => {
+        console.log('Socket.IO disconnected');
+        set({ isConnected: false });
+      });
+
+      set({ socket });
+    } catch (error) {
+      console.error('Failed to connect WebSocket:', error);
+    }
   },
 
   disconnectWebSocket: () => {
-    const { ws } = get();
-    if (ws) {
-      ws.close();
-      set({ ws: null, isConnected: false });
+    const { socket } = get();
+    if (socket) {
+      socket.disconnect();
+      set({ socket: null, isConnected: false });
     }
   },
 
   sendMessage: (message: WebSocketMessage) => {
-    const { ws, isConnected } = get();
-    if (ws && isConnected) {
-      ws.send(JSON.stringify(message));
+    const { socket, isConnected } = get();
+    if (socket && isConnected) {
+      const { type, ...data } = message;
+      socket.emit(type, data);
     }
   },
 }));

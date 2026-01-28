@@ -79,11 +79,14 @@ model Answer {
 
 model Song {
   id            String    @id @default(cuid())
-  title         String    @unique
+  title         String
   artist        String
   category      String
+  spotifyId     String?   @unique
+  previewUrl    String?   // Spotify 30-second preview URL
   createdAt     DateTime  @default(now())
 
+  @@unique([title, artist])
   @@index([category])
   @@index([title])
 }

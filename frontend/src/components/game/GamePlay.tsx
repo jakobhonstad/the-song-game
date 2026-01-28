@@ -24,12 +24,23 @@ export default function GamePlay({ game, gameCode }: GamePlayProps) {
     if (game.status === 'PLAYING' && currentRound) {
       const startTime = Date.now();
       const interval = setInterval(() => {
-        setTimeElapsed(Date.now() - startTime);
+        const elapsed = Date.now() - startTime;
+        setTimeElapsed(elapsed);
+        
+        // Auto-end round when time runs out (only host triggers this)
+        if (elapsed >= 30000 && isHost && !hasSubmitted) {
+          console.log('⏰ Time is up! Host ending round...');
+          clearInterval(interval);
+          // Wait a second then trigger round end
+          setTimeout(() => {
+            handleNextRound();
+          }, 1000);
+        }
       }, 100);
 
       return () => clearInterval(interval);
     }
-  }, [game.status, currentRound]);
+  }, [game.status, currentRound, isHost]);
 
   // Reset state on new round
   useEffect(() => {

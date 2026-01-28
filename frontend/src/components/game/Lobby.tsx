@@ -43,17 +43,43 @@ export default function Lobby({ game, gameCode }: LobbyProps) {
   
   const handleStartGame = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/games/${gameCode}/start`, {
+      console.log('🎮 [LOBBY] Button clicked - Starting game');
+      console.log('🎮 [LOBBY] isHost:', isHost);
+      console.log('🎮 [LOBBY] playerId:', playerId);
+      console.log('🎮 [LOBBY] gameCode:', gameCode);
+      console.log('🎮 [LOBBY] game.players.length:', game.players.length);
+      
+      if (!isHost) {
+        console.error('❌ [LOBBY] Not host, cannot start game');
+        alert('Bare verten kan starte spillet');
+        return;
+      }
+
+      if (game.players.length < 2) {
+        console.error('❌ [LOBBY] Not enough players');
+        alert('Trenger minst 2 spillere');
+        return;
+      }
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/games/${gameCode}/start`;
+      console.log('🎮 [LOBBY] Fetching:', url);
+      
+      const response = await fetch(url, {
         method: 'POST',
       });
 
+      console.log('🎮 [LOBBY] Response status:', response.status);
+      
       if (!response.ok) {
         const data = await response.json();
-        alert(data.error || 'Kunne ikke starte spillet');
+        throw new Error(data.error || `HTTP ${response.status}: Kunne ikke starte spillet`);
       }
+
+      console.log('✅ [LOBBY] Game started successfully');
+      // Game status should update via WebSocket event, no need to do anything here
     } catch (error) {
-      console.error('Error starting game:', error);
-      alert('Kunne ikke starte spillet');
+      console.error('❌ [LOBBY] Error starting game:', error);
+      alert(error instanceof Error ? error.message : 'Kunne ikke starte spillet');
     }
   };
 
@@ -120,14 +146,10 @@ export default function Lobby({ game, gameCode }: LobbyProps) {
           </div>
         )}
 
-        <div className="mb-4 p-3 bg-blue-500/20 rounded-lg text-sm">
-          DEBUG: isHost={isHost.toString()}, playerId={playerId}, hostId={game.hostId}
-        </div>
-
         {isHost ? (
           <button
             onClick={handleStartGame}
-            disabled={game.players.length < 1}
+            disabled={game.players.length < 2}
             className="w-full px-8 py-4 bg-white text-purple-600 rounded-xl font-bold text-lg hover:bg-white/90 transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             Start Spill
@@ -138,6 +160,5 @@ export default function Lobby({ game, gameCode }: LobbyProps) {
           </div>
         )}
       </div>
-    </div>
   );
 }

@@ -29,7 +29,7 @@ export class GameService {
         players: {
           create: {
             id: hostId,
-            name: 'Host',
+            name: createGameDto.hostName,
             isHost: true,
           },
         },
@@ -105,6 +105,12 @@ export class GameService {
       take: game.maxRounds,
     });
 
+    console.log(`🎵 [startGame] Found ${songs.length} songs for category "${game.category}"`);
+
+    if (songs.length === 0) {
+      throw new Error(`No songs found for category "${game.category}". Make sure songs are seeded in the database.`);
+    }
+
     // Update game status
     await this.prisma.game.update({
       where: { id: game.id },
@@ -127,6 +133,8 @@ export class GameService {
       });
       rounds.push(round);
     }
+
+    console.log(`🎵 [startGame] Created ${rounds.length} rounds`);
 
     return this.prisma.game.findUnique({
       where: { code },

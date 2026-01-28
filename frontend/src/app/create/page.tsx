@@ -38,15 +38,15 @@ export default function CreateGame() {
       }
 
       const data = await response.json();
-      const gameCode = data.game.code;
-      const playerId = data.game.players[0].id;
+      const gameCode = data.code;
+      const playerId = data.players[0].id;
 
       // Store player info in localStorage
       localStorage.setItem('playerId', playerId);
       localStorage.setItem('playerName', hostName);
 
       // Set game in store before redirecting
-      setGame(data.game);
+      setGame(data);
 
       // Redirect to lobby
       router.push(`/game/${gameCode}`);

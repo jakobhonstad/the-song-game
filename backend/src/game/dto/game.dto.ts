@@ -1,4 +1,5 @@
 export class CreateGameDto {
+  hostName: string;
   category: string;
   maxRounds?: number;
 }
