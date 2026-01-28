@@ -54,6 +54,20 @@ export class GameController {
   async submitAnswer(
     @Body() body: { gameCode: string; roundId: string; playerId: string; guess: string; timeElapsed: number },
   ) {
-    return this.gameService.submitAnswer(body.gameCode, body.roundId, body.playerId, body.guess, body.timeElapsed);
+    const result = await this.gameService.submitAnswer(body.gameCode, body.roundId, body.playerId, body.guess, body.timeElapsed);
+    
+    // Check if round has ended (all players answered)
+    const game = await this.gameService.getGame(body.gameCode);
+    if (game && game.status === 'ROUND_END') {
+      console.log(`📡 [Controller] All players answered! Broadcasting round-end`);
+      const currentRound = game.rounds?.find(r => r.id === body.roundId);
+      this.gameGateway.broadcastToGamePublic(body.gameCode, 'round-end', { 
+        game,
+        round: currentRound,
+        players: game.players,
+      });
+    }
+    
+    return result;
   }
 }

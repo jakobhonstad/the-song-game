@@ -192,10 +192,22 @@ export default function GamePlay({ game, gameCode }: GamePlayProps) {
   }
 
   // Playing state
+  const promptText = game.category === 'film' 
+    ? '🎬 Hør og gjett hvilken film!'
+    : game.category === 'tv'
+    ? '📺 Hør og gjett hvilken serie!'
+    : '🎵 Hør og gjett!';
+
+  const placeholderText = game.category === 'film'
+    ? 'Skriv filmnavnet...'
+    : game.category === 'tv'
+    ? 'Skriv serienavnet...'
+    : 'Skriv ditt gjett...';
+
   return (
     <div className="max-w-2xl w-full bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-8 md:p-12 text-white">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold mb-4">🎵 Hør og gjett!</h1>
+        <h1 className="text-4xl font-bold mb-4">{promptText}</h1>
         <div className="text-white/70 mb-4">
           Runde {currentRound.roundNumber} av {game.maxRounds}
         </div>
@@ -222,25 +234,36 @@ export default function GamePlay({ game, gameCode }: GamePlayProps) {
               value={guess}
               onChange={(e) => setGuess(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSubmitAnswer()}
-              placeholder="Skriv ditt gjett..."
+              placeholder={placeholderText}
               className="w-full px-4 py-4 rounded-xl bg-white/20 border-2 border-white/30 text-white text-lg placeholder-white/60 focus:outline-none focus:border-white/60 transition-all"
               autoFocus
             />
             
             {searchResults.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl max-h-60 overflow-y-auto z-10">
-                {searchResults.map((song) => (
-                  <button
-                    key={song.id}
-                    onClick={() => selectSuggestion(song.title)}
-                    className="w-full text-left px-4 py-3 hover:bg-purple-100 transition-colors text-purple-900 border-b border-purple-100 last:border-b-0"
-                  >
-                    <div className="font-bold">{song.title}</div>
-                    {song.artist && (
-                      <div className="text-sm text-purple-600">{song.artist}</div>
-                    )}
-                  </button>
-                ))}
+                {searchResults.map((song) => {
+                  const displayName = game.category === 'film' 
+                    ? song.movie 
+                    : game.category === 'tv' 
+                    ? song.tvShow 
+                    : song.title;
+                  
+                  return (
+                    <button
+                      key={song.id}
+                      onClick={() => selectSuggestion(displayName)}
+                      className="w-full text-left px-4 py-3 hover:bg-purple-100 transition-colors text-purple-900 border-b border-purple-100 last:border-b-0"
+                    >
+                      <div className="font-bold">{displayName}</div>
+                      {(game.category === 'film' || game.category === 'tv') && (
+                        <div className="text-sm text-purple-600">{song.title} - {song.artist}</div>
+                      )}
+                      {!game.category && song.artist && (
+                        <div className="text-sm text-purple-600">{song.artist}</div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>

@@ -117,9 +117,9 @@ export const useGameStore = create<GameState>((set, get) => ({
       });
 
       socket.on('round-end', (data) => {
-        console.log('Round ended:', data);
+        console.log('✅ round-end event received:', data);
         set((state: any) => ({ 
-          game: state.game ? { ...state.game, players: data.players } : null,
+          game: data.game || (state.game ? { ...state.game, status: 'ROUND_END', players: data.players } : null),
           currentRound: data.round,
         }));
       });

@@ -82,6 +82,8 @@ model Song {
   title         String
   artist        String
   category      String
+  movie         String?   // Film name if category is 'film'
+  tvShow        String?   // TV show name if category is 'tv'
   spotifyId     String?   @unique
   previewUrl    String?   // Spotify 30-second preview URL
   createdAt     DateTime  @default(now())

@@ -16,16 +16,16 @@ const songs = [
   { title: 'Lose Yourself', artist: 'Eminem', category: 'film', movie: '8 Mile' },
   
   // TV series theme songs
-  { title: 'Friends Theme', artist: 'The Rembrandts', category: 'tv', show: 'Friends' },
-  { title: 'Game of Thrones Theme', artist: 'Ramin Djawadi', category: 'tv', show: 'Game of Thrones' },
-  { title: 'The Simpsons Theme', artist: 'Danny Elfman', category: 'tv', show: 'The Simpsons' },
-  { title: 'Breaking Bad Theme', artist: 'Dave Porter', category: 'tv', show: 'Breaking Bad' },
-  { title: 'Stranger Things Theme', artist: 'Kyle Dixon & Michael Stein', category: 'tv', show: 'Stranger Things' },
-  { title: 'The Office Theme', artist: 'Jay Ferguson', category: 'tv', show: 'The Office' },
-  { title: 'How I Met Your Mother Theme', artist: 'The Solids', category: 'tv', show: 'How I Met Your Mother' },
-  { title: 'Westworld Theme', artist: 'Ramin Djawadi', category: 'tv', show: 'Westworld' },
-  { title: 'The Crown Theme', artist: 'Hans Zimmer', category: 'tv', show: 'The Crown' },
-  { title: 'Peaky Blinders Theme', artist: 'Nick Cave and the Bad Seeds', category: 'tv', show: 'Peaky Blinders' },
+  { title: 'Friends Theme', artist: 'The Rembrandts', category: 'tv', tvShow: 'Friends' },
+  { title: 'Game of Thrones Theme', artist: 'Ramin Djawadi', category: 'tv', tvShow: 'Game of Thrones' },
+  { title: 'The Simpsons Theme', artist: 'Danny Elfman', category: 'tv', tvShow: 'The Simpsons' },
+  { title: 'Breaking Bad Theme', artist: 'Dave Porter', category: 'tv', tvShow: 'Breaking Bad' },
+  { title: 'Stranger Things Theme', artist: 'Kyle Dixon & Michael Stein', category: 'tv', tvShow: 'Stranger Things' },
+  { title: 'The Office Theme', artist: 'Jay Ferguson', category: 'tv', tvShow: 'The Office' },
+  { title: 'How I Met Your Mother Theme', artist: 'The Solids', category: 'tv', tvShow: 'How I Met Your Mother' },
+  { title: 'Westworld Theme', artist: 'Ramin Djawadi', category: 'tv', tvShow: 'Westworld' },
+  { title: 'The Crown Theme', artist: 'Hans Zimmer', category: 'tv', tvShow: 'The Crown' },
+  { title: 'Peaky Blinders Theme', artist: 'Nick Cave and the Bad Seeds', category: 'tv', tvShow: 'Peaky Blinders' },
 ];
 
 // Function to get Spotify Access Token
@@ -103,6 +103,8 @@ async function main() {
         }
       },
       update: {
+        movie: 'movie' in song ? song.movie : undefined,
+        tvShow: 'tvShow' in song ? song.tvShow : undefined,
         ...(spotifyData && {
           spotifyId: spotifyData.spotifyId,
           previewUrl: spotifyData.previewUrl,
@@ -112,6 +114,8 @@ async function main() {
         title: song.title,
         artist: song.artist,
         category: song.category,
+        movie: 'movie' in song ? song.movie : undefined,
+        tvShow: 'tvShow' in song ? song.tvShow : undefined,
         ...(spotifyData && {
           spotifyId: spotifyData.spotifyId,
           previewUrl: spotifyData.previewUrl,

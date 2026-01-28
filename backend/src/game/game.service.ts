@@ -155,12 +155,31 @@ export class GameService {
       throw new Error('Round not found');
     }
 
+    // Determine correct answer based on category
+    let correctAnswer = round.songTitle;
+    
+    // For film category: check against movie name
+    // For tv category: check against TV show name  
+    if (round.category === 'film' || round.category === 'tv') {
+      const song = await this.prisma.song.findFirst({ 
+        where: { title: round.songTitle } 
+      });
+      
+      if (song) {
+        if (round.category === 'film' && song.movie) {
+          correctAnswer = song.movie;
+        } else if (round.category === 'tv' && song.tvShow) {
+          correctAnswer = song.tvShow;
+        }
+      }
+    }
+
     // Check if guess is correct (case-insensitive, fuzzy matching)
-    const correctTitle = round.songTitle.toLowerCase().trim();
+    const correctLower = correctAnswer.toLowerCase().trim();
     const guessLower = guess.toLowerCase().trim();
-    const isCorrect = guessLower === correctTitle || 
-                     correctTitle.includes(guessLower) ||
-                     guessLower.includes(correctTitle);
+    const isCorrect = guessLower === correctLower || 
+                     correctLower.includes(guessLower) ||
+                     guessLower.includes(correctLower);
 
     const points = calculatePoints(timeElapsed, isCorrect);
 
