@@ -68,10 +68,8 @@ export const useGameStore = create<GameState>((set, get) => ({
           break;
           
         case 'player-joined':
-          console.log('🎮 Player joined - updating players:', message.players);
-          set((state: any) => ({
-            game: state.game ? { ...state.game, players: message.players } : null,
-          }));
+          console.log('🎮 Player joined - updating game:', message.game);
+          set({ game: message.game });
           break;
           
         case 'game-started':

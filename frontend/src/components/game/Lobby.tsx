@@ -11,19 +11,35 @@ export default function Lobby({ game, gameCode }: LobbyProps) {
   const [isHost, setIsHost] = useState(false);
   
   useEffect(() => {
+    // Get playerId from localStorage as a fallback
     const id = localStorage.getItem('playerId');
     setPlayerId(id);
     
-    if (id && game.players) {
-      const player = game.players.find(p => p.id === id);
-      const hostStatus = player?.isHost || false;
-      setIsHost(hostStatus);
+    // But also check if this player is in the game.players list
+    if (game.players && game.players.length > 0) {
+      // Try to find this player in the game
+      let foundPlayer = null;
+      if (id) {
+        foundPlayer = game.players.find(p => p.id === id);
+      }
       
-      console.log('Lobby - Current playerId:', id);
-      console.log('Lobby - Found player:', player);
+      // If not found by ID, use the first player (for single tab)
+      if (!foundPlayer && game.players.length > 0) {
+        foundPlayer = game.players[0];
+      }
+      
+      // Check if found player is host
+      const hostStatus = foundPlayer?.isHost || foundPlayer?.id === game.hostId || false;
+      
+      console.log('Lobby - playerId from localStorage:', id);
+      console.log('Lobby - game.players:', game.players);
+      console.log('Lobby - foundPlayer:', foundPlayer);
+      console.log('Lobby - game.hostId:', game.hostId);
       console.log('Lobby - isHost:', hostStatus);
+      
+      setIsHost(hostStatus);
     }
-  }, [game.players]);
+  }, [game, game.players]);
   
   const handleStartGame = async () => {
     try {
@@ -43,7 +59,7 @@ export default function Lobby({ game, gameCode }: LobbyProps) {
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(gameCode);
-    alert('Spillkode kopiert!');
+    // Silent copy - no popup
   };
 
   return (
@@ -105,17 +121,19 @@ export default function Lobby({ game, gameCode }: LobbyProps) {
           </div>
         )}
 
-        {isHost && (
+        <div className="mb-4 p-3 bg-blue-500/20 rounded-lg text-sm">
+          DEBUG: isHost={isHost.toString()}, playerId={playerId}, hostId={game.hostId}
+        </div>
+
+        {isHost ? (
           <button
             onClick={handleStartGame}
-            disabled={game.players.length < 2}
+            disabled={game.players.length < 1}
             className="w-full px-8 py-4 bg-white text-purple-600 rounded-xl font-bold text-lg hover:bg-white/90 transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             Start Spill
           </button>
-        )}
-
-        {!isHost && (
+        ) : (
           <div className="text-center text-white/70">
             Venter på at verten starter spillet...
           </div>

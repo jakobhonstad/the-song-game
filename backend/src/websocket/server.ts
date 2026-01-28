@@ -1,16 +1,14 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
 
-// Import in-memory storage from game routes
-const gamesMap = new Map<string, any>();
-const playersMap = new Map<string, any>();
+// Shared references to game storage (will be set by main server)
+let gamesMap: Map<string, any>;
+let playersMap: Map<string, any>;
 
-// Share storage with game routes
+// Share storage with game routes by reference (not copy)
 export function setGameStorage(games: Map<string, any>, players: Map<string, any>) {
-  gamesMap.clear();
-  playersMap.clear();
-  games.forEach((v, k) => gamesMap.set(k, v));
-  players.forEach((v, k) => playersMap.set(k, v));
+  gamesMap = games;
+  playersMap = players;
 }
 
 export function getGameStorage() {

@@ -64,6 +64,9 @@ app.post('/', zValidator('json', createGameSchema), async (c) => {
   games.set(code, game); // Also store by code for quick lookup
   players.set(hostId, hostPlayer);
   
+  console.log('🎮 Game created:', { code, gameId, hostId, hostName });
+  console.log('🗺️  Games Map now has keys:', Array.from(games.keys()));
+  
   return c.json({ game }, 201);
 });
 
@@ -71,12 +74,17 @@ app.post('/', zValidator('json', createGameSchema), async (c) => {
 app.get('/:code', async (c) => {
   const code = c.req.param('code');
   
+  console.log('🔍 GET game by code:', code);
+  console.log('🗺️  Games Map keys:', Array.from(games.keys()));
+  
   const game = games.get(code);
   
   if (!game) {
+    console.log('❌ Game not found for code:', code);
     return c.json({ error: 'Game not found' }, 404);
   }
   
+  console.log('✅ Game found:', { code: game.code, id: game.id, players: game.players.length });
   return c.json({ game });
 });
 
@@ -106,12 +114,14 @@ app.post('/join', zValidator('json', joinGameSchema), async (c) => {
   
   game.players.push(player);
   players.set(playerId, player);
+  game.updatedAt = new Date().toISOString();
   
   // Notify other players via WebSocket
   console.log(`📢 Broadcasting player-joined to game ${code}, players:`, game.players.length);
+  console.log('Game hostId:', game.hostId, 'Players:', game.players.map((p: any) => ({ id: p.id, name: p.name, isHost: p.isHost })));
   broadcastToGame(code, {
     type: 'player-joined',
-    players: game.players,
+    game: game,
   });
   
   return c.json({ player, game });
@@ -138,6 +148,13 @@ app.post('/:code/start', async (c) => {
   game.status = 'PLAYING';
   game.currentRound = 1;
   game.updatedAt = new Date().toISOString();
+  
+  // Broadcast game started to all players
+  console.log(`🎬 Game started: ${code}`);
+  broadcastToGame(code, {
+    type: 'game-started',
+    game: game,
+  });
   
   return c.json({ game });
 });

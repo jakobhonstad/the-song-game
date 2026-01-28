@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useGameStore } from '@/lib/store/game-store';
 
 const categories = [
   { id: 'film', name: '🎬 Film', description: 'Temalåter fra kjente filmer' },
@@ -10,6 +11,7 @@ const categories = [
 
 export default function CreateGame() {
   const router = useRouter();
+  const { setGame } = useGameStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('film');
@@ -42,6 +44,9 @@ export default function CreateGame() {
       // Store player info in localStorage
       localStorage.setItem('playerId', playerId);
       localStorage.setItem('playerName', hostName);
+
+      // Set game in store before redirecting
+      setGame(data.game);
 
       // Redirect to lobby
       router.push(`/game/${gameCode}`);
