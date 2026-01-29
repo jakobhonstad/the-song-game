@@ -3,7 +3,7 @@ export interface Game {
   code: string;
   category: string;
   status: GameStatus;
-  hostId: string | null;
+  hostId: string;
   currentRound: number;
   maxRounds: number;
   createdAt: string;
@@ -26,11 +26,10 @@ export interface Round {
   gameId: string;
   roundNumber: number;
   songId: string;
-  songTitle?: string; // Hidden during gameplay
+  songTitle: string;
   songArtist?: string | null;
-  audioUrl?: string | null;
-  startedAt: string;
-  endedAt?: string | null;
+  category: string;
+  createdAt: string;
   answers?: Answer[];
 }
 
@@ -41,21 +40,24 @@ export interface Answer {
   guess: string;
   isCorrect: boolean;
   points: number;
-  submittedAt: string;
+  timeElapsed: number;
+  createdAt: string;
   player?: Player;
 }
 
 export interface Song {
   id: string;
   title: string;
-  artist: string | null;
+  artist: string;
   category: string;
-  audioUrl: string | null;
-  imageUrl: string | null;
+  movie?: string | null;
+  tvShow?: string | null;
+  spotifyId?: string | null;
+  previewUrl?: string | null;
   createdAt: string;
 }
 
-export type GameStatus = 'WAITING' | 'PLAYING' | 'ROUND_END' | 'FINISHED';
+export type GameStatus = 'LOBBY' | 'PLAYING' | 'ROUND_END' | 'FINISHED';
 
 export interface WebSocketMessage {
   type: string;

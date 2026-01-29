@@ -37,7 +37,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/games/${gameCode}`);
       if (!response.ok) throw new Error('Game not found');
       const game = await response.json();
-      set({ game });
+      let currentRound: Round | null = null;
+      if (game?.rounds?.length && typeof game.currentRound === 'number' && game.currentRound > 0) {
+        currentRound = game.rounds.find((r: Round) => r.roundNumber === game.currentRound) || null;
+      }
+      set({ game, currentRound });
     } catch (error) {
       console.error('Error fetching game:', error);
       throw error;
@@ -113,7 +117,15 @@ export const useGameStore = create<GameState>((set, get) => ({
 
       socket.on('next-round', (data) => {
         console.log('Next round:', data);
-        set({ currentRound: data.round });
+        const game = data.game || data;
+        let round = data.round;
+        if (!round && game?.rounds?.length) {
+          round = game.rounds.find((r: any) => r.roundNumber === game.currentRound) || game.rounds[0];
+        }
+        set({
+          game: game?.code ? game : null,
+          currentRound: round || null,
+        });
       });
 
       socket.on('round-end', (data) => {
@@ -127,11 +139,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       socket.on('game-finished', (data) => {
         console.log('Game finished:', data);
         set((state) => ({
-          game: state.game ? { 
+          game: data.game || (state.game ? { 
             ...state.game, 
             status: 'FINISHED',
-            players: data.leaderboard,
-          } : null,
+            players: data.leaderboard || state.game.players,
+          } : null),
         }));
       });
 

@@ -81,10 +81,21 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('next-round')
   async handleNextRound(@MessageBody() data: { gameCode: string }, @ConnectedSocket() client: Socket) {
     const { gameCode } = data;
+    await this.gameService.nextRound(gameCode);
+
     const game = await this.gameService.getGame(gameCode);
-    if (game) {
-      this.broadcastToGame(gameCode, 'round-changed', { game });
+    if (!game) {
+      return;
     }
+
+    if (game.status === 'FINISHED') {
+      const leaderboard = [...game.players].sort((a, b) => b.score - a.score);
+      this.broadcastToGame(gameCode, 'game-finished', { game, leaderboard });
+      return;
+    }
+
+    const round = game.rounds?.find((r) => r.roundNumber === game.currentRound) || null;
+    this.broadcastToGame(gameCode, 'next-round', { game, round });
   }
 
   private broadcastToGame(gameCode: string, event: string, data: any) {
