@@ -234,13 +234,18 @@ export class GameService {
     }
 
     if (game.currentRound >= game.maxRounds) {
-      // Game finished
-      await this.prisma.game.update({
-        where: { id: game.id },
-        data: { status: 'FINISHED' },
-      });
-      return;
-    }
+    await this.prisma.game.update({
+      where: { id: game.id },
+      data: { status: 'FINISHED' },
+    });
+    
+    // Delete after 5 minutes
+    setTimeout(async () => {
+      await this.prisma.game.delete({ where: { id: game.id } });
+    }, 5 * 60 * 1000);
+    
+    return;
+  }
 
     // Move to next round
     const nextRoundNum = game.currentRound + 1;
