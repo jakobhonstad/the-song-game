@@ -70,4 +70,9 @@ export class GameController {
     
     return result;
   }
+
+  @Post('cleanup')
+  async cleanupOldGames() {
+    return this.gameService.deleteOldGames();
+  }
 }

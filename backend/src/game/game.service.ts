@@ -238,13 +238,6 @@ export class GameService {
       where: { id: game.id },
       data: { status: 'FINISHED' },
     });
-    
-    // Delete after 5 minutes
-    setTimeout(async () => {
-      await this.prisma.game.delete({ where: { id: game.id } });
-    }, 5 * 60 * 1000);
-    
-    return;
   }
 
     // Move to next round
@@ -253,5 +246,21 @@ export class GameService {
       where: { id: game.id },
       data: { status: 'PLAYING', currentRound: nextRoundNum },
     });
+  }
+
+  async deleteOldGames() {
+    const oneDayAgo = new Date();
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+
+    const result = await this.prisma.game.deleteMany({
+      where: {
+        createdAt: {
+          lt: oneDayAgo,
+        },
+      },
+    });
+
+    console.log(`🗑️ Deleted ${result.count} games older than 24 hours`);
+    return result;
   }
 }
