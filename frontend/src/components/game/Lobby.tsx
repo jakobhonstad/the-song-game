@@ -144,16 +144,16 @@ export default function Lobby({ game, gameCode }: LobbyProps) {
           </div>
         </div>
 
-        {game.players.length < 2 && (
+        {game.players.length < 1 && (
           <div className="mb-6 p-4 bg-yellow-500/20 border border-yellow-500/50 rounded-lg text-center">
-            Trenger minst 2 spillere for å starte
+            Trenger minst 1 spiller for å starte
           </div>
         )}
 
         {isHost ? (
           <button
             onClick={handleStartGame}
-            disabled={game.players.length < 2}
+            disabled={game.players.length < 1}
             className="w-full px-8 py-4 bg-white text-purple-600 rounded-xl font-bold text-lg hover:bg-white/90 transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             Start Spill

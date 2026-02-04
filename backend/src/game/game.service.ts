@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { CreateGameDto, JoinGameDto } from './dto/game.dto';
+import { searchDeezer } from 'src/utils/deezer';
 
 function generateGameCode(): string {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -119,8 +120,9 @@ export class GameService {
 
     // Create rounds with songs
     const rounds: any[] = [];
-    for (let i = 0; i < Math.min(songs.length, game.maxRounds); i++) {
+    for (let i = 0; i < songs.length; i++) {
       const song = songs[i];
+      const freshData = await searchDeezer(song.title, song.artist);
       const round = await this.prisma.round.create({
         data: {
           gameId: game.id,
@@ -129,7 +131,7 @@ export class GameService {
           songTitle: song.title,
           songArtist: song.artist,
           category: song.category,
-          previewUrl: song.previewUrl,
+          previewUrl: freshData?.previewUrl || null,
         },
       });
       rounds.push(round);
