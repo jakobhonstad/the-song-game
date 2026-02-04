@@ -1,175 +1,136 @@
+This project is still under development. There are bugs and unfished work.
+Deezer is used for song previews
+
 # The Song Game 🎵
 
-En multiplayer musikk-quiz webapplikasjon bygget med moderne teknologier.
+A multiplayer music‑quiz web app with real‑time updates.
 
-## 🚀 Teknologi Stack
+## Stack
 
-### Frontend
-- **Next.js 15** (App Router) - React framework med server-side rendering
-- **TypeScript** - Type-safe utvikling
-- **Tailwind CSS** - Utility-first CSS framework
-- **Zustand** - State management
-- **Socket.IO Client** - Real-time kommunikasjon
+**Frontend**
+- Next.js 15 (App Router)
+- TypeScript
+- Tailwind CSS
+- Zustand
+- Socket.IO Client
 
-### Backend
-- **NestJS** - Progressive Node.js framework
-- **TypeScript** - Type-safe API
-- **Socket.IO** - Real-time spill-oppdateringer
-- **Prisma ORM** - Type-safe database queries
+**Backend**
+- NestJS
+- TypeScript
+- Socket.IO
+- Prisma ORM
 
-### Database
-- **PostgreSQL (Neon)** - Cloud-hosted PostgreSQL database (gratis tier)
-- **Prisma** - Type-safe database client
+**Database**
+- PostgreSQL
+- Prisma
 
-## 🎮 Funksjoner
+## What it does
 
-- **Kategorier**: Velg mellom ulike musikkategorier (Film, TV-serier, etc.)
-- **Multiplayer**: Spillere logger inn med en spillkode
-- **Real-time**: Live oppdateringer under spillet via WebSocket
-- **Autocomplete**: Intelligente søkeforslag når spillere gjetter
-- **Scoreboard**: Poeng-system og resultattavle
-- **Persistent Storage**: Alle spill og resultater lagres i PostgreSQL database
+- Create a game and share a code
+- Players join with the code
+- Real‑time updates during the game
+- Scores and results at the end
 
-## 📁 Prosjektstruktur
+## Quick start
 
-```
-the-song-game/
-├── frontend/          # Next.js applikasjon
-│   ├── src/
-│   │   ├── app/      # App Router pages
-│   │   ├── components/
-│   │   ├── lib/      # Utilities og store (Zustand)
-│   │   └── types/    # TypeScript types
-│   └── package.json
-│
-├── backend/          # NestJS API server
-│   ├── src/
-│   │   ├── game/     # Game module (controller, service, gateway)
-│   │   ├── songs/    # Songs module
-│   │   ├── prisma/   # Prisma service
-│   │   └── main.ts   # Application entry point
-│   ├── prisma/
-│   │   ├── schema.prisma  # Database schema
-│   │   ├── seed.ts        # Database seeding
-│   │   └── migrations/    # Database migrations
-│   └── package.json
-│   └── package.json
-│
-└── README.md
-```
-
-## 🛠️ Kom i gang
-
-### Forutsetninger
+### Requirements
 - Node.js 18+
-- npm eller pnpm
-- PostgreSQL database (eller bruk Neon gratis tier)
+- npm or pnpm
+- PostgreSQL
 
-### Installasjon
+### Setup
 
-1. Klon repository:
+1. Clone the repo:
 ```bash
 git clone https://github.com/jakobhonstad/the-song-game.git
 cd the-song-game
 ```
 
-2. Sett opp backend:
+2. Backend:
 ```bash
 cd backend
 npm install
 
-# Opprett .env fil med database connection string
+# Create .env
 echo 'DATABASE_URL="postgresql://user:password@host/dbname"' > .env
 
-# Kjør database migrations
+# Migrate
 npx prisma migrate dev
 
-# Seed database med sanger
+# Seed songs
 npm run prisma:seed
 ```
 
-3. Sett opp frontend:
+3. Frontend:
 ```bash
 cd ../frontend
 npm install
 
-# Opprett .env.local fil
+# Create .env.local
 echo 'NEXT_PUBLIC_API_URL=http://localhost:3001' > .env.local
 echo 'NEXT_PUBLIC_WS_URL=ws://localhost:3001' >> .env.local
 ```
 
-4. Start utviklingsservere:
+4. Run dev servers:
 ```bash
-# Terminal 1 - Backend (port 3001)
+# Terminal 1
 cd backend
 npm run start:dev
 
-# Terminal 2 - Frontend (port 3000)
+# Terminal 2
 cd frontend
 npm run dev
 ```
 
-5. Åpne applikasjonen:
+5. Open:
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:3001/api
 
-## 🏗️ Database Schema
+## Environment variables
 
-Database bruker Prisma ORM med følgende modeller:
-- **Game**: Spillinformasjon (kode, status, kategori, runder)
-- **Player**: Spillerinformasjon (navn, score, host-status)
-- **Round**: Runde-informasjon (runde nummer, sang, svar)
-- **Answer**: Spiller-svar (gjett, korrekthet, poeng, tid)
-- **Song**: Sang-bibliotek (tittel, artist, kategori)
+**Backend (.env)**
+- `DATABASE_URL` – PostgreSQL connection string
+- `PORT` – Optional (default: 3001)
 
-## 🎯 API Endpoints
+**Frontend (.env.local)**
+- `NEXT_PUBLIC_API_URL` – HTTP API base URL
+- `NEXT_PUBLIC_WS_URL` – WebSocket base URL
 
-### REST API (port 3001)
-- `POST /api/games` - Opprett nytt spill
-- `POST /api/games/join` - Join eksisterende spill
-- `GET /api/games/:code` - Hent spillinformasjon
-- `POST /api/games/:code/start` - Start spillet
-- `POST /api/games/:code/next-round` - Gå til neste runde
-- `POST /api/games/submit-answer` - Send inn svar
-- `GET /api/songs/search` - Søk etter sanger
+> Both point to the same port because the backend serves HTTP and WebSocket.
 
-### WebSocket Events
-- `join-game` - Koble til spill-rom
-- `player-joined` - Ny spiller joined
-- `game-started` - Spill startet
-- `next-round` - Neste runde
-- `answer-submitted` - Svar sendt inn
-- `round-end` - Runde ferdig
-- `game-finished` - Spill ferdig
+## Scripts
 
-## 📝 Completed Features
+**Backend**
+- `npm run start:dev`
+- `npm run start`
+- `npm run build`
+- `npm run prisma:seed`
 
-- ✅ NestJS backend med TypeScript
-- ✅ PostgreSQL database på Neon (gratis tier)
-- ✅ Prisma ORM for database access
-- ✅ Socket.IO for real-time kommunikasjon
-- ✅ REST API for spill-operasjoner
-- ✅ Next.js frontend med App Router
-- ✅ Zustand state management
-- ✅ Tailwind CSS styling med glassmorphism design
-- ✅ Multiplayer lobby system
-- ✅ Real-time player updates
-- ✅ Game code system for joining
-- ✅ Song search with autocomplete
-- ✅ Two-tab testing support (Incognito mode)
+**Frontend**
+- `npm run dev`
+- `npm run build`
+- `npm run start`
 
-## 🚧 TODO
+## API
 
-- [ ] Implementer musikkavspilling
-- [ ] Test full game flow (alle 10 runder)
-- [ ] Implementer round progression
-- [ ] Legg til game-finished state og final results
-- [ ] Forbedre error handling
-- [ ] Legg til loading states
-- [ ] Deployment på Vercel (frontend) og Railway/Render (backend)
-- [ ] Legg til flere sanger i databasen
-- [ ] Implementer flere kategorier (TV, sport, etc.)
+**REST (port 3001)**
+- `POST /api/games` – Create game
+- `POST /api/games/join` – Join game
+- `GET /api/games/:code` – Get game
+- `POST /api/games/:code/start` – Start game
+- `POST /api/games/:code/next-round` – Next round
+- `POST /api/games/submit-answer` – Submit answer
+- `POST /api/games/cleanup` – Cleanup old games
+- `GET /api/songs/search` – Search songs
 
-## 📄 Lisens
+**Header (optional)**
+- `x-player-id` – Keep the same player ID between calls
 
-MIT
+**WebSocket events**
+Client → Server: `join-game`, `game-started`, `answer-submitted`, `next-round`
+
+Server → Client: `joined-game`, `player-joined`, `game-started`, `answer-submitted`, `next-round`, `round-end`, `game-finished`
+
+## License
+
+Not specified.

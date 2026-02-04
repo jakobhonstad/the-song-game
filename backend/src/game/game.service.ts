@@ -7,13 +7,6 @@ function generateGameCode(): string {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
-function calculatePoints(timeElapsed: number, isCorrect: boolean): number {
-  if (!isCorrect) return 0;
-  const timeInSeconds = timeElapsed / 1000;
-  const maxTime = 30;
-  return Math.max(0, Math.round(100 * (1 - timeInSeconds / maxTime)));
-}
-
 @Injectable()
 export class GameService {
   constructor(private prisma: DatabaseService) {}
@@ -184,7 +177,7 @@ export class GameService {
                      correctLower.includes(guessLower) ||
                      guessLower.includes(correctLower);
 
-    const points = calculatePoints(timeElapsed, isCorrect);
+    const points = 1;
 
     // Create answer
     const answer = await this.prisma.answer.create({
