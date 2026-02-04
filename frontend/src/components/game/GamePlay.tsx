@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Game } from '@/types/game';
 import { useGameStore } from '@/lib/store/game-store';
 
@@ -15,7 +15,7 @@ export default function GamePlay({ game, gameCode }: GamePlayProps) {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [searchResults, setSearchResults] = useState<any[]>([]);
-  
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const playerId = typeof window !== 'undefined' ? localStorage.getItem('playerId') : null;
   const isHost = game.players.find(p => p.id === playerId)?.isHost || false;
 
@@ -41,6 +41,26 @@ export default function GamePlay({ game, gameCode }: GamePlayProps) {
       return () => clearInterval(interval);
     }
   }, [game.status, currentRound, isHost]);
+
+  // Play audio previews from Deezer
+  useEffect(() => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+    }
+
+    const audio = audioRef.current;
+
+    if (currentRound?.previewUrl && game.status === 'PLAYING') {
+      audio.src = currentRound.previewUrl;
+      audio.play().catch((err) => {
+        console.error('Error playing audio preview:', err);
+      });
+    }
+
+    return () => {
+      audio.pause();
+    };
+  }, [currentRound?.id, currentRound?.previewUrl, game.status]);
 
   // Reset state on new round
   useEffect(() => {

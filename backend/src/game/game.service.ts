@@ -129,6 +129,7 @@ export class GameService {
           songTitle: song.title,
           songArtist: song.artist,
           category: song.category,
+          previewUrl: song.previewUrl,
         },
       });
       rounds.push(round);

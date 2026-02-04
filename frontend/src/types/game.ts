@@ -30,6 +30,7 @@ export interface Round {
   songArtist?: string | null;
   category: string;
   createdAt: string;
+  previewUrl?: string | null;
   answers?: Answer[];
 }
 

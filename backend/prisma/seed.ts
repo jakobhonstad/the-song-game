@@ -28,72 +28,35 @@ const songs = [
   { title: 'Peaky Blinders Theme', artist: 'Nick Cave and the Bad Seeds', category: 'tv', tvShow: 'Peaky Blinders' },
 ];
 
-// Function to get Spotify Access Token
-async function getSpotifyToken(): Promise<string> {
-  const clientId = process.env.SPOTIFY_CLIENT_ID;
-  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-
-  if (!clientId || !clientSecret) {
-    console.warn('⚠️ SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET not set. Skipping Spotify data.');
-    return '';
-  }
-
-  const response = await fetch('https://accounts.spotify.com/api/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': 'Basic ' + Buffer.from(clientId + ':' + clientSecret).toString('base64'),
-    },
-    body: 'grant_type=client_credentials',
-  });
-
-  const data = await response.json();
-  return data.access_token;
-}
-
-// Function to search for a song on Spotify
-async function searchSpotify(title: string, artist: string, token: string) {
-  if (!token) return null;
-
+// Function to search for a song on Deezer
+async function searchDeezer(title: string, artist: string) {
   try {
-    const query = encodeURIComponent(`${title} ${artist}`);
-    const response = await fetch(`https://api.spotify.com/v1/search?q=${query}&type=track&limit=1`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
+    // Deezer API search with artist and track name
+    const query = encodeURIComponent(`artist:"${artist}" track:"${title}"`);
+    const response = await fetch(`https://api.deezer.com/search?q=${query}`);
 
     const data = await response.json();
-    const track = data.tracks?.items?.[0];
+    const track = data.data?.[0]; // First result
 
-    if (track) {
+    if (track && track.preview) {
       return {
-        spotifyId: track.id,
-        previewUrl: track.preview_url,
+        deezerId: track.id.toString(),
+        previewUrl: track.preview, // 30-second MP3 preview URL
       };
     }
   } catch (error) {
-    console.error(`Error searching for "${title}" by ${artist}:`, error);
+    console.error(`Error searching Deezer for "${title}" by ${artist}:`, error);
   }
 
   return null;
 }
 
 async function main() {
-  console.log('🎵 Start seeding songs...');
-  
-  // Get Spotify token
-  const spotifyToken = await getSpotifyToken();
-  
-  if (spotifyToken) {
-    console.log('✅ Spotify token obtained');
-  } else {
-    console.log('⚠️ No Spotify token - songs will be created without preview URLs');
-  }
+  console.log('🎵 Start seeding songs with Deezer previews...');
 
   for (const song of songs) {
-    // Search Spotify for the song
-    const spotifyData = await searchSpotify(song.title, song.artist, spotifyToken);
+    // Search Deezer for the song
+    const deezerData = await searchDeezer(song.title, song.artist);
     
     const result = await prisma.song.upsert({
       where: { 
@@ -105,9 +68,8 @@ async function main() {
       update: {
         movie: 'movie' in song ? song.movie : undefined,
         tvShow: 'tvShow' in song ? song.tvShow : undefined,
-        ...(spotifyData && {
-          spotifyId: spotifyData.spotifyId,
-          previewUrl: spotifyData.previewUrl,
+        ...(deezerData && {
+          previewUrl: deezerData.previewUrl,
         }),
       },
       create: {
@@ -116,14 +78,16 @@ async function main() {
         category: song.category,
         movie: 'movie' in song ? song.movie : undefined,
         tvShow: 'tvShow' in song ? song.tvShow : undefined,
-        ...(spotifyData && {
-          spotifyId: spotifyData.spotifyId,
-          previewUrl: spotifyData.previewUrl,
+        ...(deezerData && {
+          previewUrl: deezerData.previewUrl,
         }),
       },
     });
     
-    console.log(`✅ ${song.title} by ${song.artist} ${spotifyData?.previewUrl ? '(with preview)' : '(no preview)'}`);
+    console.log(`✅ ${song.title} by ${song.artist} ${deezerData?.previewUrl ? '(with Deezer preview)' : '(no preview found)'}`);
+    
+    // Small delay to avoid rate limiting
+    await new Promise(resolve => setTimeout(resolve, 200));
   }
 
   console.log('✅ Seeding finished.');

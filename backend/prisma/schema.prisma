@@ -50,6 +50,7 @@ model Round {
   songTitle     String
   songArtist    String?
   category      String
+  previewUrl    String? // Song preview URL
   createdAt     DateTime  @default(now())
 
   game          Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
