@@ -54,10 +54,14 @@ export default function Lobby({ game, gameCode }: LobbyProps) {
         alert('Bare verten kan starte spillet');
         return;
       }
-
-      if (game.players.length < 2) {
+      /*
+      For testing, må endres til 2.
+      Kan vurdere å la det være bare en spiller, hvis man spille med gjetting IRL.
+      Isåfall må man legge til en funskjon som sier hva svaret er etter hver runde.
+      */
+      if (game.players.length < 1) {
         console.error('❌ [LOBBY] Not enough players');
-        alert('Trenger minst 2 spillere');
+        alert('Trenger minst 1 spiller');
         return;
       }
 

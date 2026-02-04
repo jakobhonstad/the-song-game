@@ -50,7 +50,7 @@ export default function GamePlay({ game, gameCode }: GamePlayProps) {
 
     const audio = audioRef.current;
 
-    if (currentRound?.previewUrl && game.status === 'PLAYING') {
+    if (currentRound?.previewUrl && game.status === 'PLAYING' && isHost) {
       audio.src = currentRound.previewUrl;
       audio.play().catch((err) => {
         console.error('Error playing audio preview:', err);
