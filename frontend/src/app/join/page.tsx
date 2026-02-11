@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import type { Game } from '@/types/game';
 
 export default function JoinGame() {
   const router = useRouter();
@@ -30,9 +32,9 @@ export default function JoinGame() {
         throw new Error(data.error || 'Kunne ikke bli med i spillet');
       }
 
-      const data = await response.json();
+      const data: Game = await response.json();
       // Backend returns the game object directly, find the current player
-      const playerId = data.players.find((p: any) => p.name === playerName)?.id;
+      const playerId = data.players.find((player) => player.name === playerName)?.id;
 
       // Store player info in localStorage
       localStorage.setItem('playerId', playerId);
@@ -40,8 +42,8 @@ export default function JoinGame() {
 
       // Redirect to game lobby
       router.push(`/game/${gameCode.toUpperCase()}`);
-    } catch (err: any) {
-      setError(err.message || 'Noe gikk galt. Prøv igjen.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Noe gikk galt. Prøv igjen.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -104,9 +106,9 @@ export default function JoinGame() {
         </form>
 
         <div className="mt-6 text-center">
-          <a href="/" className="text-white/70 hover:text-white transition-colors">
+          <Link href="/" className="text-white/70 hover:text-white transition-colors">
             ← Tilbake
-          </a>
+          </Link>
         </div>
       </div>
     </main>

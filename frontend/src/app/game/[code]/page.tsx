@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useGameStore } from '@/lib/store/game-store';
+import type { Game } from '@/types/game';
 import Lobby from '@/components/game/Lobby';
 import GamePlay from '@/components/game/GamePlay';
 import GameResults from '@/components/game/GameResults';
@@ -13,7 +15,7 @@ export default function GamePage() {
   const gameCode = params.code as string;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [initializedGame, setInitializedGame] = useState<any>(null);
+  const [initializedGame, setInitializedGame] = useState<Game | null>(null);
 
   const { game, connectWebSocket, fetchGame } = useGameStore();
 
@@ -55,8 +57,7 @@ export default function GamePage() {
         setInitializedGame(currentGame);
         
         // Connect to WebSocket (don't await to avoid blocking)
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        connectWebSocket(gameCode, playerId).catch((err: Error) => {
+        void connectWebSocket(gameCode, playerId).catch((err: Error) => {
           console.error('WebSocket connection error:', err);
         });
         
@@ -86,9 +87,9 @@ export default function GamePage() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 overflow-hidden">
-        <a href="/" className="fixed top-4 left-4 z-50 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white/80 hover:text-white text-sm transition-colors">
+        <Link href="/" className="fixed top-4 left-4 z-50 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white/80 hover:text-white text-sm transition-colors">
           ← Hjem
-        </a>
+        </Link>
         <main className="flex-1 flex items-center justify-center">
           <div className="text-white text-2xl">Laster spill...</div>
         </main>
@@ -99,9 +100,9 @@ export default function GamePage() {
   if (error || !initializedGame) {
     return (
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 overflow-hidden">
-        <a href="/" className="fixed top-4 left-4 z-50 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white/80 hover:text-white text-sm transition-colors">
+        <Link href="/" className="fixed top-4 left-4 z-50 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white/80 hover:text-white text-sm transition-colors">
           ← Hjem
-        </a>
+        </Link>
         <main className="flex-1 flex items-center justify-center">
           <div className="text-white text-center">
             <div className="text-2xl mb-4">{error || 'Spill ikke funnet'}</div>
@@ -128,9 +129,9 @@ export default function GamePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 overflow-hidden">
-      <a href="/" className="fixed top-4 left-4 z-50 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white/80 hover:text-white text-sm transition-colors">
+      <Link href="/" className="fixed top-4 left-4 z-50 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white/80 hover:text-white text-sm transition-colors">
         ← Hjem
-      </a>
+      </Link>
       <div className="flex-1 flex items-center justify-center p-8">
         {renderContent()}
       </div>

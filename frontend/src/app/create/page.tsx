@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useGameStore } from '@/lib/store/game-store';
 
@@ -123,9 +124,9 @@ export default function CreateGame() {
         </form>
 
         <div className="mt-6 text-center">
-          <a href="/" className="text-white/70 hover:text-white transition-colors">
+          <Link href="/" className="text-white/70 hover:text-white transition-colors">
             ← Tilbake
-          </a>
+          </Link>
         </div>
       </div>
     </main>

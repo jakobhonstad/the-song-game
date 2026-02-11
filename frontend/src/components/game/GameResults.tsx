@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { Game } from '@/types/game';
 
 interface GameResultsProps {
@@ -55,12 +56,12 @@ export default function GameResults({ game }: GameResultsProps) {
         </div>
 
         <div className="space-y-3">
-          <a
+          <Link
             href="/"
             className="block w-full px-8 py-4 bg-white text-purple-600 rounded-xl font-bold text-lg text-center hover:bg-white/90 transition-all transform hover:scale-105 shadow-lg"
           >
             Spill igjen
-          </a>
+          </Link>
           
           <button
             onClick={() => {

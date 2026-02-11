@@ -62,5 +62,5 @@ export type GameStatus = 'LOBBY' | 'PLAYING' | 'ROUND_END' | 'FINISHED';
 
 export interface WebSocketMessage {
   type: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }

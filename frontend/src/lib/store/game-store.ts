@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 import type { Socket } from 'socket.io-client';
-import type { Game, Round, WebSocketMessage } from '@/types/game';
+import type { Game, Player, Round, WebSocketMessage } from '@/types/game';
+
+type GameEventPayload = {
+  game?: Game;
+  round?: Round;
+  players?: Player[];
+  leaderboard?: Player[];
+} | Game;
 
 interface GameState {
   game: Game | null;
@@ -11,7 +18,7 @@ interface GameState {
   // Actions
   setGame: (game: Game) => void;
   setCurrentRound: (round: Round | null) => void;
-  updatePlayers: (players: any[]) => void;
+  updatePlayers: (players: Player[]) => void;
   connectWebSocket: (gameCode: string, playerId: string) => Promise<void>;
   disconnectWebSocket: () => void;
   sendMessage: (message: WebSocketMessage) => void;
@@ -72,7 +79,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         socket.emit('join-game', { gameCode, playerId });
       });
 
-      socket.on('joined-game', (game) => {
+      socket.on('joined-game', (game: Game) => {
         console.log('✅ joined-game event received:', { game, hasCode: game?.code, code: game?.code });
         if (game && game.code) {
           set({ game });
@@ -81,7 +88,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         }
       });
 
-      socket.on('player-joined', (game) => {
+      socket.on('player-joined', (game: Game) => {
         console.log('✅ player-joined event received:', { game, hasCode: game?.code });
         if (game && game.code) {
           set({ game });
@@ -90,11 +97,12 @@ export const useGameStore = create<GameState>((set, get) => ({
         }
       });
 
-      socket.on('game-started', (data) => {
+      socket.on('game-started', (data: GameEventPayload) => {
         console.log('✅ game-started event received:', data);
         // Backend sends either { game, round } or just game directly
-        const game = data.game || data;
-        let round = data.round;
+        const payload = data as { game?: Game; round?: Round };
+        const game = payload.game || (data as Game);
+        let round = payload.round;
         
         // If no explicit round, get first round from game.rounds
         if (!round && game.rounds && game.rounds.length > 0) {
@@ -115,12 +123,13 @@ export const useGameStore = create<GameState>((set, get) => ({
         }
       });
 
-      socket.on('next-round', (data) => {
+      socket.on('next-round', (data: GameEventPayload) => {
         console.log('Next round:', data);
-        const game = data.game || data;
-        let round = data.round;
+        const payload = data as { game?: Game; round?: Round };
+        const game = payload.game || (data as Game);
+        let round = payload.round;
         if (!round && game?.rounds?.length) {
-          round = game.rounds.find((r: any) => r.roundNumber === game.currentRound) || game.rounds[0];
+          round = game.rounds.find((r) => r.roundNumber === game.currentRound) || game.rounds[0];
         }
         set({
           game: game?.code ? game : null,
@@ -128,26 +137,28 @@ export const useGameStore = create<GameState>((set, get) => ({
         });
       });
 
-      socket.on('round-end', (data) => {
+      socket.on('round-end', (data: GameEventPayload) => {
         console.log('✅ round-end event received:', data);
-        set((state: any) => ({ 
-          game: data.game || (state.game ? { ...state.game, status: 'ROUND_END', players: data.players } : null),
-          currentRound: data.round,
+        const payload = data as { game?: Game; round?: Round; players?: Player[] };
+        set((state) => ({
+          game: payload.game || (state.game ? { ...state.game, status: 'ROUND_END', players: payload.players || state.game.players } : null),
+          currentRound: payload.round || null,
         }));
       });
 
-      socket.on('game-finished', (data) => {
+      socket.on('game-finished', (data: GameEventPayload) => {
         console.log('Game finished:', data);
+        const payload = data as { game?: Game; leaderboard?: Player[] };
         set((state) => ({
-          game: data.game || (state.game ? { 
-            ...state.game, 
+          game: payload.game || (state.game ? {
+            ...state.game,
             status: 'FINISHED',
-            players: data.leaderboard || state.game.players,
+            players: payload.leaderboard || state.game.players,
           } : null),
         }));
       });
 
-      socket.on('error', (data) => {
+      socket.on('error', (data: unknown) => {
         console.error('Socket error:', data);
       });
 
