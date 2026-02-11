@@ -8,7 +8,6 @@ import {
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { GameService } from '../game/game.service';
-import { DatabaseService } from '../database/database.service';
 
 @WebSocketGateway({
   cors: { origin: '*' },
@@ -17,7 +16,7 @@ import { DatabaseService } from '../database/database.service';
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private gameConnections = new Map<string, Set<Socket>>();
 
-  constructor(private gameService: GameService, private prisma: DatabaseService) {}
+  constructor(private gameService: GameService) {}
 
   handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);

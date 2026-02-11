@@ -295,6 +295,11 @@ export default function GamePlay({ game, gameCode }: GamePlayProps) {
           >
             Send inn svar
           </button>
+          <button
+            onClick={handleNextRound}
+          >
+            Neste runde
+          </button>
         </div>
       ) : (
         <div className="text-center p-6 bg-green-500/20 rounded-xl">
