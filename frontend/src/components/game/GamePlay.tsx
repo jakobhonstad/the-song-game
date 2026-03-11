@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { Game } from '@/types/game';
-import { useGameStore } from '@/lib/store/game-store';
+import { useGameStore } from '@/lib/game-store';
 import RoundResults from './RoundResults';
 import RoundPlay from './RoundPlay';
 import { useAudioPreview } from './hooks/useAudioPreview';
-import { useRoundTimer } from './hooks/useRoundTimer';
 import { useSongSearch } from './hooks/useSongSearch';
+import { useTimer } from './hooks/timer';
 
 interface GamePlayProps {
   game: Game;
@@ -22,19 +22,13 @@ export default function GamePlay({ game, gameCode }: GamePlayProps) {
   const playerId = typeof window !== 'undefined' ? localStorage.getItem('playerId') : null;
   const isHost = game.players.find(p => p.id === playerId)?.isHost || false;
 
-  const timeElapsed = useRoundTimer({
-    status: game.status,
-    currentRound,
-    isHost,
-    hasSubmitted,
-    onTimeout: () => {
-      console.log('⏰ Time is up! Host ending round...');
-      sendMessage({
-        type: 'next-round',
-        gameCode,
-      });
-    },
+  const roundSeconds = 30;
+  const secondsRemaining = useTimer({
+    initialSeconds: roundSeconds,
+    isActive: game.status === 'PLAYING',
+    resetKey: currentRound?.id || null,
   });
+  const timeElapsed = Math.max(0, roundSeconds - secondsRemaining) * 1000;
 
   useAudioPreview({
     status: game.status,
@@ -42,7 +36,10 @@ export default function GamePlay({ game, gameCode }: GamePlayProps) {
     isHost,
   });
 
+
   const { searchResults, clearResults } = useSongSearch(guess, game.category);
+
+  const [hasTimedOut, setHasTimedOut] = useState(false);
 
   // Reset state on new round
   useEffect(() => {
@@ -50,8 +47,25 @@ export default function GamePlay({ game, gameCode }: GamePlayProps) {
       setHasSubmitted(false);
       setGuess('');
       clearResults();
+      setHasTimedOut(false);
     }
   }, [currentRound?.id, game.status, clearResults]);
+
+  useEffect(() => {
+    if (!currentRound || game.status !== 'PLAYING') return;
+    if (!isHost || hasSubmitted || hasTimedOut) return;
+    if (secondsRemaining > 0) return;
+
+    const timeout = setTimeout(() => {
+      sendMessage({
+        type: 'next-round',
+        gameCode,
+      });
+      setHasTimedOut(true);
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, [currentRound, game.status, isHost, hasSubmitted, hasTimedOut, secondsRemaining, sendMessage, gameCode]);
 
   const handleSubmitAnswer = () => {
     if (!currentRound || !playerId || !guess.trim() || hasSubmitted) return;
@@ -110,6 +124,7 @@ export default function GamePlay({ game, gameCode }: GamePlayProps) {
       guess={guess}
       hasSubmitted={hasSubmitted}
       timeElapsed={timeElapsed}
+      //timeElapsed={timeElapsed}
       searchResults={searchResults}
       onGuessChange={setGuess}
       onSelectSuggestion={selectSuggestion}

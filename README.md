@@ -1,4 +1,4 @@
-This project is still under development. There are bugs and unfished work.
+This project is still under development. There are bugs and unfinished work.
 Deezer is used for song previews
 
 # The Song Game 🎵
@@ -86,6 +86,58 @@ npm run dev
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:3001/api
 
+## Project structure
+
+```
+backend/
+	src/
+		game/
+			game.controller.ts   # REST endpoints for games
+			game.gateway.ts      # WebSocket events
+			game.module.ts       # Game module wiring
+			game.service.ts      # Orchestrator for game logic
+			game-players.service.ts  # Player/join/create logic
+			game-rounds.service.ts   # Round lifecycle logic
+			game-answers.service.ts  # Answer validation/scoring
+			dto/
+				game.dto.ts
+		database/
+			database.module.ts
+			database.service.ts
+		songs/
+			songs.controller.ts
+			songs.service.ts
+		utils/
+			deezer.ts
+	prisma/
+		schema.prisma
+		seed.ts
+
+frontend/
+	src/
+		app/                  # Route-based pages (Next.js App Router)
+			page.tsx            # /
+			create/page.tsx     # /create
+			join/page.tsx       # /join
+			game/[code]/page.tsx  # /game/:code
+		components/
+			game/
+				GamePlay.tsx
+				RoundPlay.tsx
+				RoundResults.tsx
+				Lobby.tsx
+				GameResults.tsx
+				hooks/
+					useAudioPreview.ts
+					useRoundTimer.ts
+					useSongSearch.ts
+		lib/
+			store/
+				game-store.ts
+		types/
+			game.ts
+```
+
 ## Environment variables
 
 **Backend (.env)**
@@ -134,3 +186,7 @@ Server → Client: `joined-game`, `player-joined`, `game-started`, `answer-submi
 ## License
 
 Not specified.
+
+## Developer Guide
+
+For a full technical walkthrough in Norwegian, see `DEVELOPER_GUIDE.md`.

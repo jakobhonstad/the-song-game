@@ -36,6 +36,10 @@ export default function JoinGame() {
       // Backend returns the game object directly, find the current player
       const playerId = data.players.find((player) => player.name === playerName)?.id;
 
+      if (!playerId) {
+        throw new Error('Spilleren ble ikke funnet i spillet');
+      }
+
       // Store player info in localStorage
       localStorage.setItem('playerId', playerId);
       localStorage.setItem('playerName', playerName);

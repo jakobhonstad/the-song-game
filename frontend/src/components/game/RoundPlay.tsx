@@ -113,7 +113,6 @@ export default function RoundPlay({
           >
             Send inn svar
           </button>
-          <button onClick={onNextRound}>Neste runde</button>
         </div>
       ) : (
         <div className="text-center p-6 bg-green-500/20 rounded-xl">
@@ -123,6 +122,7 @@ export default function RoundPlay({
       )}
 
       <div className="mt-8">
+        <button onClick={onNextRound}>Neste runde</button>
         <h3 className="text-lg font-bold mb-3">Spillere ({game.players.length})</h3>
         <div className="grid grid-cols-2 gap-2">
           {game.players.map((player) => {

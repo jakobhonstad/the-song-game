@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useGameStore } from '@/lib/store/game-store';
+import { useGameStore } from '@/lib/game-store';
 import type { Game } from '@/types/game';
 import Lobby from '@/components/game/Lobby';
 import GamePlay from '@/components/game/GamePlay';
@@ -37,7 +37,7 @@ export default function GamePage() {
       try {
         // Get current game from store
         let currentGame = useGameStore.getState().game;
-        
+
         // Only fetch if game is not already in store or has wrong code
         if (!currentGame || currentGame.code !== gameCode) {
           console.log('Fetching game from API...');
@@ -47,20 +47,20 @@ export default function GamePage() {
         } else {
           console.log('Game already in store, skipping fetch');
         }
-        
+
         // Verify game is actually set before proceeding
         if (!currentGame) {
           throw new Error('Game not found');
         }
-        
+
         // Set the initialized game to local state
         setInitializedGame(currentGame);
-        
+
         // Connect to WebSocket (don't await to avoid blocking)
         void connectWebSocket(gameCode, playerId).catch((err: Error) => {
           console.error('WebSocket connection error:', err);
         });
-        
+
         setLoading(false);
       } catch (err) {
         console.error('Error initializing game:', err);

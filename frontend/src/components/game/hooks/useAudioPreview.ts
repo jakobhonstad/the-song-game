@@ -20,7 +20,9 @@ export function useAudioPreview({ status, currentRound, isHost }: UseAudioPrevie
     if (currentRound?.previewUrl && status === 'PLAYING' && isHost) {
       audio.src = currentRound.previewUrl;
       audio.play().catch((err) => {
-        console.error('Error playing audio preview:', err);
+        if (err?.name !== 'AbortError') {
+          console.error('Error playing audio preview:', err);
+        }
       });
     }
 
