@@ -1,14 +1,11 @@
-This project is still under development. There are bugs and unfinished work.
-Deezer is used for song previews
-
 # The Song Game 🎵
 
-A multiplayer music‑quiz web app with real‑time updates.
+En multiplayer musikkquiz med sanntidsoppdateringer.
 
-## Stack
+## Teknologi
 
 **Frontend**
-- Next.js 15 (App Router)
+- Next.js 16 (App Router)
 - TypeScript
 - Tailwind CSS
 - Zustand
@@ -24,32 +21,131 @@ A multiplayer music‑quiz web app with real‑time updates.
 - PostgreSQL
 - Prisma
 
-## What it does
+## Funksjoner
 
-- Create a game and share a code
-- Players join with the code
-- Real‑time updates during the game
-- Scores and results at the end
+- Opprett spill og del kode
+- Spillere kan bli med med kode
+- Sanntidsoppdateringer under spillet
+- Poeng og resultater
 
-## Quick start
+## Kom i gang
 
-### Requirements
+### Krav
 - Node.js 18+
-- npm or pnpm
+- npm eller pnpm
 - PostgreSQL
 
-### Setup
 
-1. Clone the repo:
+### Oppsett
+
+1. Klon repo:
 ```bash
 git clone https://github.com/jakobhonstad/the-song-game.git
 cd the-song-game
 ```
 
-2. Backend:
+2. Installer avhengigheter:
+
+**Backend:**
 ```bash
 cd backend
 npm install
+```
+
+**Frontend:**
+```bash
+cd ../frontend
+npm install
+```
+
+3. Sett opp PostgreSQL:
+
+- Installer PostgreSQL:
+	- macOS: `brew install postgresql`
+	- Ubuntu: `sudo apt install postgresql`
+- Start tjenesten:
+	- macOS: `brew services start postgresql`
+	- Ubuntu: `sudo service postgresql start`
+- Opprett database:
+```bash
+psql -U postgres
+CREATE DATABASE songgame;
+```
+	- Finn connection string (typisk):
+	```
+	postgresql://postgres:<passord>@localhost:5432/songgame
+	```
+	- Legg til connection string i backend/.env:
+		```
+		DATABASE_URL="postgresql://postgres:<passord>@localhost:5432/songgame"
+		```
+
+4. Konfigurer miljøvariabler:
+
+**Frontend:**
+- Legg til .env.local i frontend-mappen:
+```
+NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_WS_URL=ws://localhost:3001
+```
+
+**Backend:**
+- Connection string i schema.prisma.
+
+5. Initialiser database:
+```bash
+cd backend
+npx prisma migrate dev --name init
+npx prisma db seed
+```
+
+6. Start prosjektet:
+
+**Backend:**
+```bash
+cd backend
+npm run start:dev
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm run dev
+```
+
+Frontend kjører på http://localhost:3000 og backend på http://localhost:3001.
+
+### Filstruktur
+
+- backend/
+	- src/
+	- prisma/
+	- package.json
+- frontend/
+	- src/
+	- package.json
+
+### Viktige filer
+
+- frontend/.env.local (må opprettes)
+- backend/prisma/schema.prisma
+- backend/prisma/seed.ts
+
+### Avhengigheter
+
+Se package.json i både backend og frontend for fullstendig liste.
+
+### Tips
+- Restart frontend etter endring i .env.local.
+- Bruk IP-adresse i .env.local hvis du tester på nettverk.
+
+### Feilsøking
+- Sjekk at backend kjører og lytter på riktig port.
+- Sjekk at frontend bruker riktig API-URL.
+- Sjekk at du har dynamisk route: frontend/src/app/game/[code]/page.tsx.
+
+---
+Prosjektet er under utvikling. Deezer brukes for sangpreviews.
 
 # Create .env
 echo 'DATABASE_URL="postgresql://user:password@host/dbname"' > .env
@@ -134,6 +230,7 @@ frontend/
 		lib/
 			store/
 				game-store.ts
+				game-socket.ts
 		types/
 			game.ts
 ```

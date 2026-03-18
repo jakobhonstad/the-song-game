@@ -94,8 +94,8 @@ export default function CreateGame() {
                   type="button"
                   onClick={() => setSelectedCategory(category.id)}
                   className={`w-full p-4 rounded-lg text-left transition-all ${selectedCategory === category.id
-                      ? 'bg-white text-purple-600 shadow-lg'
-                      : 'bg-white/20 hover:bg-white/30'
+                    ? 'bg-white text-purple-600 shadow-lg'
+                    : 'bg-white/20 hover:bg-white/30'
                     }`}
                 >
                   <div className="font-bold text-lg">{category.name}</div>
