@@ -7,87 +7,86 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Game {
-  id            String    @id @default(cuid())
-  code          String    @unique
-  hostId        String
-  status        String    @default("LOBBY") // LOBBY, PLAYING, ROUND_END, FINISHED
-  category      String    @default("film")
-  maxRounds     Int       @default(10)
-  currentRound  Int       @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id           String   @id @default(cuid())
+  code         String   @unique
+  hostId       String
+  status       String   @default("LOBBY") // LOBBY, PLAYING, ROUND_END, FINISHED
+  category     String   @default("film")
+  maxRounds    Int      @default(10)
+  currentRound Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  players       Player[]
-  rounds        Round[]
+  players Player[]
+  rounds  Round[]
 
   @@index([code])
 }
 
 model Player {
-  id            String    @id @default(cuid())
-  gameId        String
-  name          String
-  isHost        Boolean   @default(false)
-  score         Int       @default(0)
-  createdAt     DateTime  @default(now())
+  id        String   @id @default(cuid())
+  gameId    String
+  name      String
+  isHost    Boolean  @default(false)
+  score     Int      @default(0)
+  createdAt DateTime @default(now())
 
-  game          Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  answers       Answer[]
+  game    Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  answers Answer[]
 
-  @@index([gameId])
   @@unique([gameId, name])
+  @@index([gameId])
 }
 
 model Round {
-  id            String    @id @default(cuid())
-  gameId        String
-  roundNumber   Int
-  songId        String
-  songTitle     String
-  songArtist    String?
-  category      String
-  previewUrl    String? // Song preview URL
-  createdAt     DateTime  @default(now())
+  id          String   @id @default(cuid())
+  gameId      String
+  roundNumber Int
+  songId      String
+  songTitle   String
+  songArtist  String?
+  category    String
+  previewUrl  String? // Song preview URL
+  createdAt   DateTime @default(now())
 
-  game          Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  answers       Answer[]
+  game    Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  answers Answer[]
 
-  @@index([gameId])
   @@unique([gameId, roundNumber])
+  @@index([gameId])
 }
 
 model Answer {
-  id            String    @id @default(cuid())
-  roundId       String
-  playerId      String
-  guess         String
-  isCorrect     Boolean   @default(false)
-  points        Int       @default(0)
-  timeElapsed   Int       // in milliseconds
-  createdAt     DateTime  @default(now())
+  id          String   @id @default(cuid())
+  roundId     String
+  playerId    String
+  guess       String
+  isCorrect   Boolean  @default(false)
+  points      Int      @default(0)
+  timeElapsed Int // in milliseconds
+  createdAt   DateTime @default(now())
 
-  round         Round     @relation(fields: [roundId], references: [id], onDelete: Cascade)
-  player        Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  round  Round  @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
+  @@unique([roundId, playerId])
   @@index([roundId])
   @@index([playerId])
-  @@unique([roundId, playerId])
 }
 
 model Song {
-  id            String    @id @default(cuid())
-  title         String
-  artist        String
-  category      String
-  movie         String?   // Film name if category is 'film'
-  tvShow        String?   // TV show name if category is 'tv'
-  spotifyId     String?   @unique
-  previewUrl    String?   // Spotify 30-second preview URL
-  createdAt     DateTime  @default(now())
+  id         String   @id @default(cuid())
+  title      String
+  artist     String
+  category   String
+  movie      String? // Film name if category is 'film'
+  tvShow     String? // TV show name if category is 'tv'
+  spotifyId  String?  @unique
+  previewUrl String? // Spotify 30-second preview URL
+  createdAt  DateTime @default(now())
 
   @@unique([title, artist])
   @@index([category])

@@ -16,11 +16,12 @@ import { GameService } from '../game/game.service';
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private gameConnections = new Map<string, Set<Socket>>();
 
-  constructor(private gameService: GameService) {}
+  constructor(private gameService: GameService) { }
 
   handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
   }
+
 
   handleDisconnect(client: Socket) {
     console.log(`Client disconnected: ${client.id}`);
@@ -31,7 +32,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleJoinGame(@MessageBody() data: { gameCode: string }, @ConnectedSocket() client: Socket) {
     const { gameCode } = data;
     console.log(`📡 [join-game] Client ${client.id} joining game: ${gameCode}`);
-    
+
     // Add client to game room
     const roomName = `game-${gameCode}`;
     if (!this.gameConnections.has(gameCode)) {

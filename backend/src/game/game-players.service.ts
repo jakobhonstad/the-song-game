@@ -2,13 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { CreateGameDto, JoinGameDto } from './dto/game.dto';
 
+// generateGameCode() må flyttes, gir ikke mening at generateGameCode ligger i game-players filen  
 function generateGameCode(): string {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
 @Injectable()
 export class GamePlayersService {
-  constructor(private prisma: DatabaseService) {}
+  constructor(private prisma: DatabaseService) { }
 
   async createGame(createGameDto: CreateGameDto, hostId: string) {
     const code = generateGameCode();
