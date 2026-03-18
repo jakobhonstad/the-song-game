@@ -2,16 +2,9 @@ import { io, type Socket } from 'socket.io-client';
 import type { Game, Player, Round, WebSocketMessage } from '@/types/game';
 import { useGameStore } from '@/lib/game-store';
 
-type GameEventPayload = {
-    game?: Game;
-    round?: Round;
-    players?: Player[];
-    leaderboard?: Player[];
-} | Game;
-
 let socket: Socket | null = null;
 
-export async function connectGameSocket(gameCode: string, playerId: string) {
+export async function connectWebSocket(gameCode: string, playerId: string) {
     // If not on browser return
     if (typeof window === 'undefined') return;
 
@@ -31,7 +24,7 @@ export async function connectGameSocket(gameCode: string, playerId: string) {
         socket?.emit('join-game', { gameCode, playerId });
     });
 
-    socket.on('joined-game', (game: Game) => {
+    socket.on('joined-game', ({ game }: { game: Game }) => {
         if (!game?.code) return;
 
         const { setGame, setCurrentRound } = useGameStore.getState();
@@ -50,16 +43,37 @@ export async function connectGameSocket(gameCode: string, playerId: string) {
         setCurrentRound(round ?? null);
     });
 
-    socket.on('answer-submitted')
+    socket.on('answer-submitted', ({ game }: { game: Game }) => {
+        if (!game) return;
+
+        const { setGame } = useGameStore.getState();
+        setGame(game);
+    });
+
+    socket.on('next-round', ({ game, round }: { game: Game; round?: Round; }) => {
+        if (!game) return;
+
+        const { setGame, setCurrentRound } = useGameStore.getState();
+        setGame(game);
+        setCurrentRound(round ?? null);
+    });
+
+    socket.on('game-finished', ({ game, leaderboard }: { game: Game; leaderboard: Player[]; }) => {
+        if (!game) return;
+
+        const { setGame, setCurrentRound } = useGameStore.getState();
+        setGame({ ...game, players: leaderboard });
+        setCurrentRound(null);
+    })
 }
 
-export function disconnectGameSocket() {
+export function disconnectWebSocket() {
     if (!socket) return;
     socket.disconnect();
     socket = null;
 }
 
-export function sendGameMessage(message: WebSocketMessage) {
+export function sendMessage(message: WebSocketMessage) {
     if (!socket) return;
     const { type, ...data } = message;
     socket.emit(type, data);

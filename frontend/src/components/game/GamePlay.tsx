@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { Game } from '@/types/game';
 import { useGameStore } from '@/lib/game-store';
+import { sendMessage } from '@/lib/game-socket';
 import RoundResults from './RoundResults';
 import RoundPlay from './RoundPlay';
 import { useAudioPreview } from './hooks/useAudioPreview';
@@ -16,7 +17,7 @@ interface GamePlayProps {
 }
 
 export default function GamePlay({ game, gameCode }: GamePlayProps) {
-  const { currentRound, sendMessage } = useGameStore();
+  const { currentRound } = useGameStore();
   const [guess, setGuess] = useState('');
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const playerId = typeof window !== 'undefined' ? localStorage.getItem('playerId') : null;

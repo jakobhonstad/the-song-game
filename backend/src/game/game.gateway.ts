@@ -53,7 +53,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.emit('joined-game', game);
       // Broadcast to all players in game that someone joined
       console.log(`📡 [join-game] Broadcasting 'player-joined' to all in room ${roomName}`);
-      this.broadcastToGame(gameCode, 'player-joined', game);
+      this.broadcastToGame(gameCode, 'player-joined', { game });
     }
   }
 

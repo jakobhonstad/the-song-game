@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useGameStore } from '@/lib/game-store';
+import { connectWebSocket } from '@/lib/game-socket';
 import type { Game } from '@/types/game';
 import Lobby from '@/components/game/Lobby';
 import GamePlay from '@/components/game/GamePlay';
@@ -17,7 +18,7 @@ export default function GamePage() {
   const [error, setError] = useState('');
   const [initializedGame, setInitializedGame] = useState<Game | null>(null);
 
-  const { game, connectWebSocket, fetchGame } = useGameStore();
+  const { game, fetchGame } = useGameStore();
 
   useEffect(() => {
     const playerId = localStorage.getItem('playerId');
