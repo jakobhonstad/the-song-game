@@ -1,289 +1,122 @@
-# The Song Game 🎵
+# The Song Game
 
-En multiplayer musikkquiz med sanntidsoppdateringer.
-
-## Teknologi
-
-**Frontend**
-- Next.js 16 (App Router)
-- TypeScript
-- Tailwind CSS
-- Zustand
-- Socket.IO Client
-
-**Backend**
-- NestJS
-- TypeScript
-- Socket.IO
-- Prisma ORM
-
-**Database**
-- PostgreSQL
-- Prisma
+Et multiplayer quiz-spill hvor du tester dine musikk- og filmkunnskaper! Spillet lar deg opprette eller bli med i et spill, og konkurrere om å gjette riktige filmer eller TV-serier basert på kjente låter og temamusikk.
 
 ## Funksjoner
 
-- Opprett spill og del kode
-- Spillere kan bli med med kode
-- Sanntidsoppdateringer under spillet
-- Poeng og resultater
+- Opprett eller bli med i spill med venner
+- Velg kategori: Film eller TV-serier
+- Spill flere runder med 30-sekunders musikkklipp
+- Svar og få poeng for riktige svar og rask respons
+- Live oppdateringer via WebSocket
+- Resultater og vinneroversikt
 
-## Kom i gang
+## Teknologier
 
-### Krav
-- Node.js 18+
-- npm eller pnpm
-- PostgreSQL
+- **Backend:** NestJS (TypeScript), Prisma, Socket.io, PostgreSQL
+- **Frontend:** Next.js (React), Tailwind CSS, Zustand, Socket.io-client
+- **Database:** PostgreSQL, Prisma ORM
 
+## Oppsett
 
-### Oppsett
+### 1. Klon repo
 
-1. Klon repo:
 ```bash
 git clone https://github.com/jakobhonstad/the-song-game.git
 cd the-song-game
 ```
 
-2. Installer avhengigheter:
 
-**Backend:**
+### 2. Backend
+
 ```bash
 cd backend
 npm install
 ```
 
-**Frontend:**
+
+
+#### Databasealternativer (velg én)
+
+**A. Lokal PostgreSQL**
+
+1. Installer PostgreSQL (macOS):
+	```bash
+	brew install postgresql
+	brew services start postgresql
+	```
+2. Opprett database:
+	```bash
+	createdb songgame
+	```
+3. Connection string:
+	```
+	postgresql://<bruker>:<passord>@localhost:5432/songgame
+	```
+	(Bytt ut `<bruker>` og `<passord>` med din lokale PostgreSQL-bruker og passord)
+
+**B. Neon (cloud)**
+
+1. Opprett konto og prosjekt på [neon.tech](https://neon.tech)
+2. Opprett database (f.eks. `songgame`)
+3. Finn "Connection string" i prosjektet:
+	```
+	postgresql://<bruker>:<passord>@ep-...neon.tech/<database>?sslmode=require
+	```
+
+#### Miljøvariabler
+Opprett `.env`-fil i `backend` med:
+
+```
+DATABASE_URL="<din_connection_string>"
+```
+Bruk connection string fra alternativet du har valgt.
+
+#### Database migrering og seeding
+1. Kjør migrering:
+	```bash
+	npx prisma migrate dev
+	```
+2. Seed database med sanger:
+	```bash
+	npm run prisma:seed
+	```
+
+### 3. Frontend
+
 ```bash
 cd ../frontend
 npm install
 ```
 
-3. Sett opp PostgreSQL:
+#### Miljøvariabler
+Opprett `.env.local` i `frontend` med:
 
-- Installer PostgreSQL:
-	- macOS: `brew install postgresql`
-	- Ubuntu: `sudo apt install postgresql`
-- Start tjenesten:
-	- macOS: `brew services start postgresql`
-	- Ubuntu: `sudo service postgresql start`
-- Opprett database:
-```bash
-psql -U postgres
-CREATE DATABASE songgame;
 ```
-	- Finn connection string (typisk):
-	```
-	postgresql://postgres:<passord>@localhost:5432/songgame
-	```
-	- Legg til connection string i backend/.env:
-		```
-		DATABASE_URL="postgresql://postgres:<passord>@localhost:5432/songgame"
-		```
-
-4. Konfigurer miljøvariabler:
-
-**Frontend:**
-- Legg til .env.local i frontend-mappen:
-```
-NEXT_PUBLIC_API_URL=http://localhost:3001
-NEXT_PUBLIC_WS_URL=ws://localhost:3001
+NEXT_PUBLIC_API_URL="http://localhost:3001"
 ```
 
-**Backend:**
-- Connection string i schema.prisma.
+## Kjøre prosjektet
 
-5. Initialiser database:
-```bash
-cd backend
-npx prisma migrate dev --name init
-npx prisma db seed
-```
-
-6. Start prosjektet:
-
-**Backend:**
+### Backend
 ```bash
 cd backend
 npm run start:dev
 ```
 
-**Frontend:**
+### Frontend
 ```bash
 cd frontend
 npm run dev
 ```
 
-Frontend kjører på http://localhost:3000 og backend på http://localhost:3001.
+Frontend vil være tilgjengelig på [http://localhost:3000](http://localhost:3000)
+Backend kjører på [http://localhost:3001](http://localhost:3001)
 
-### Filstruktur
+## Kontakt
 
-- backend/
-	- src/
-	- prisma/
-	- package.json
-- frontend/
-	- src/
-	- package.json
-
-### Viktige filer
-
-- frontend/.env.local (må opprettes)
-- backend/prisma/schema.prisma
-- backend/prisma/seed.ts
-
-### Avhengigheter
-
-Se package.json i både backend og frontend for fullstendig liste.
-
-### Tips
-- Restart frontend etter endring i .env.local.
-- Bruk IP-adresse i .env.local hvis du tester på nettverk.
-
-### Feilsøking
-- Sjekk at backend kjører og lytter på riktig port.
-- Sjekk at frontend bruker riktig API-URL.
-- Sjekk at du har dynamisk route: frontend/src/app/game/[code]/page.tsx.
+Utvikler: Jakob Honstad
+GitHub: [jakobhonstad](https://github.com/jakobhonstad)
 
 ---
-Prosjektet er under utvikling. Deezer brukes for sangpreviews.
-
-# Create .env
-echo 'DATABASE_URL="postgresql://user:password@host/dbname"' > .env
-
-# Migrate
-npx prisma migrate dev
-
-# Seed songs
-npm run prisma:seed
-```
-
-3. Frontend:
-```bash
-cd ../frontend
-npm install
-
-# Create .env.local
-echo 'NEXT_PUBLIC_API_URL=http://localhost:3001' > .env.local
-echo 'NEXT_PUBLIC_WS_URL=ws://localhost:3001' >> .env.local
-```
-
-4. Run dev servers:
-```bash
-# Terminal 1
-cd backend
-npm run start:dev
-
-# Terminal 2
-cd frontend
-npm run dev
-```
-
-5. Open:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:3001/api
-
-## Project structure
-
-```
-backend/
-	src/
-		game/
-			game.controller.ts   # REST endpoints for games
-			game.gateway.ts      # WebSocket events
-			game.module.ts       # Game module wiring
-			game.service.ts      # Orchestrator for game logic
-			game-players.service.ts  # Player/join/create logic
-			game-rounds.service.ts   # Round lifecycle logic
-			game-answers.service.ts  # Answer validation/scoring
-			dto/
-				game.dto.ts
-		database/
-			database.module.ts
-			database.service.ts
-		songs/
-			songs.controller.ts
-			songs.service.ts
-		utils/
-			deezer.ts
-	prisma/
-		schema.prisma
-		seed.ts
-
-frontend/
-	src/
-		app/                  # Route-based pages (Next.js App Router)
-			page.tsx            # /
-			create/page.tsx     # /create
-			join/page.tsx       # /join
-			game/[code]/page.tsx  # /game/:code
-		components/
-			game/
-				GamePlay.tsx
-				RoundPlay.tsx
-				RoundResults.tsx
-				Lobby.tsx
-				GameResults.tsx
-				hooks/
-					useAudioPreview.ts
-					useRoundTimer.ts
-					useSongSearch.ts
-		lib/
-			store/
-				game-store.ts
-				game-socket.ts
-		types/
-			game.ts
-```
-
-## Environment variables
-
-**Backend (.env)**
-- `DATABASE_URL` – PostgreSQL connection string
-- `PORT` – Optional (default: 3001)
-
-**Frontend (.env.local)**
-- `NEXT_PUBLIC_API_URL` – HTTP API base URL
-- `NEXT_PUBLIC_WS_URL` – WebSocket base URL
-
-> Both point to the same port because the backend serves HTTP and WebSocket.
-
-## Scripts
-
-**Backend**
-- `npm run start:dev`
-- `npm run start`
-- `npm run build`
-- `npm run prisma:seed`
-
-**Frontend**
-- `npm run dev`
-- `npm run build`
-- `npm run start`
-
-## API
-
-**REST (port 3001)**
-- `POST /api/games` – Create game
-- `POST /api/games/join` – Join game
-- `GET /api/games/:code` – Get game
-- `POST /api/games/:code/start` – Start game
-- `POST /api/games/:code/next-round` – Next round
-- `POST /api/games/submit-answer` – Submit answer
-- `POST /api/games/cleanup` – Cleanup old games
-- `GET /api/songs/search` – Search songs
-
-**Header (optional)**
-- `x-player-id` – Keep the same player ID between calls
-
-**WebSocket events**
-Client → Server: `join-game`, `game-started`, `answer-submitted`, `next-round`
-
-Server → Client: `joined-game`, `player-joined`, `game-started`, `answer-submitted`, `next-round`, `round-end`, `game-finished`
-
-## License
-
-Not specified.
-
-## Developer Guide
-
-For a full technical walkthrough in Norwegian, see `DEVELOPER_GUIDE.md`.
+> The Song Game © 2026
