@@ -4,6 +4,7 @@ import { CreateGameDto, JoinGameDto } from './dto/game.dto';
 import { GamePlayersService } from './game-players.service';
 import { GameRoundsService } from './game-rounds.service';
 import { GameAnswersService } from './game-answers.service';
+import { GameCreateService } from './game-create.service';
 
 @Injectable()
 export class GameService {
@@ -12,10 +13,11 @@ export class GameService {
     private playersService: GamePlayersService,
     private roundsService: GameRoundsService,
     private answersService: GameAnswersService,
-  ) {}
+    private createService: GameCreateService,
+  ) { }
 
   async createGame(createGameDto: CreateGameDto, hostId: string) {
-    return this.playersService.createGame(createGameDto, hostId);
+    return this.createService.createGame(createGameDto, hostId);
   }
 
   async joinGame(joinGameDto: JoinGameDto, playerId: string) {

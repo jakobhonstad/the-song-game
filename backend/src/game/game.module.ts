@@ -6,6 +6,7 @@ import { GamePlayersService } from './game-players.service';
 import { GameRoundsService } from './game-rounds.service';
 import { GameAnswersService } from './game-answers.service';
 import { DatabaseModule } from '../database/database.module';
+import { GameCreateService } from './game-create.service';
 
 @Module({
   imports: [DatabaseModule],
@@ -16,7 +17,8 @@ import { DatabaseModule } from '../database/database.module';
     GamePlayersService,
     GameRoundsService,
     GameAnswersService,
+    GameCreateService,
   ],
   exports: [GameService],
 })
-export class GameModule {}
+export class GameModule { }
