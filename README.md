@@ -115,7 +115,7 @@ Backend kjører på [http://localhost:3001](http://localhost:3001)
 
 ## Kontakt
 
-Utvikler: Jakob Honstad
+Utvikler: Jakob Hammari Onstad
 GitHub: [jakobhonstad](https://github.com/jakobhonstad)
 
 ---

@@ -4,7 +4,7 @@ import { searchDeezer } from 'src/utils/deezer';
 
 @Injectable()
 export class GameRoundsService {
-  constructor(private prisma: DatabaseService) {}
+  constructor(private prisma: DatabaseService) { }
 
   async startGame(code: string) {
     const game = await this.prisma.game.findUnique({
@@ -17,6 +17,8 @@ export class GameRoundsService {
     }
 
     // Get random songs for the rounds
+    // update this function to get random songs
+    // might have to use raqSQL to accomplish this
     const songs = await this.prisma.song.findMany({
       where: { category: game.category },
       take: game.maxRounds,
