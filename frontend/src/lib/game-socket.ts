@@ -21,9 +21,11 @@ export async function connectWebSocket(gameCode: string, playerId: string) {
     });
     // When new socket is started, send join-game
     socket.on('connect', () => {
+        console.log("new socket connected");
         socket?.emit('join-game', { gameCode, playerId });
     });
 
+    // update for the current player that joined
     socket.on('joined-game', ({ game }: { game: Game }) => {
         if (!game?.code) return;
 
@@ -34,6 +36,18 @@ export async function connectWebSocket(gameCode: string, playerId: string) {
             game.rounds?.find((r) => r.roundNumber === game.currentRound) || null;
         setCurrentRound(round);
     });
+
+    // Update new player for all players
+    socket.on('player-joined', ({ game }: { game: Game }) => {
+        if (!game?.code) return;
+
+        const { setGame, setCurrentRound } = useGameStore.getState();
+        setGame(game);
+
+        const round =
+            game.rounds?.find((r) => r.roundNumber === game.currentRound) || null;
+        setCurrentRound(round);
+    })
 
     socket.on('game-started', ({ game, round }: { game: Game; round?: Round }) => {
         if (!game) return;

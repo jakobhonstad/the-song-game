@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { Game } from '@/types/game';
+import { connectWebSocket } from "@/lib/game-socket";
 
 export default function JoinGame() {
   const router = useRouter();
@@ -12,7 +13,7 @@ export default function JoinGame() {
   const [gameCode, setGameCode] = useState('');
   const [playerName, setPlayerName] = useState('');
 
-  const handleJoinGame = async (e: React.FormEvent) => {
+  const handleJoinGame = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -39,13 +40,17 @@ export default function JoinGame() {
       if (!playerId) {
         throw new Error('Spilleren ble ikke funnet i spillet');
       }
-
       // Store player info in localStorage
       localStorage.setItem('playerId', playerId);
       localStorage.setItem('playerName', playerName);
 
+      // Connect to websocket
+      await connectWebSocket(gameCode, playerId);
+
       // Redirect to game lobby
       router.push(`/game/${gameCode.toUpperCase()}`);
+
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Noe gikk galt. Prøv igjen.');
       console.error(err);

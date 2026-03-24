@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useGameStore } from '@/lib/game-store';
+import { connectWebSocket } from '@/lib/game-socket';
 
 const categories = [
   { id: 'film', name: '🎬 Film', description: 'Temalåter fra kjente filmer' },
@@ -45,6 +46,9 @@ export default function CreateGame() {
       // Store player info in localStorage
       localStorage.setItem('playerId', playerId);
       localStorage.setItem('playerName', hostName);
+
+      // Connect to websocket
+      await connectWebSocket(gameCode, playerId);
 
       // Set game in store before redirecting
       setGame(data);
