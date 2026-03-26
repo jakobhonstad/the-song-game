@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, Headers, Inject } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Headers, Inject, BadRequestException } from '@nestjs/common';
 import { GameService } from './game.service';
 import { GameGateway } from './game.gateway';
 import { CreateGameDto, JoinGameDto } from './dto/game.dto';
@@ -8,18 +8,22 @@ export class GameController {
   constructor(
     private gameService: GameService,
     private gameGateway: GameGateway,
-  ) {}
+  ) { }
 
   @Post()
-  async createGame(@Body() createGameDto: CreateGameDto, @Headers('x-player-id') playerId?: string) {
-    const playerIdToUse = playerId || `player_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    return this.gameService.createGame(createGameDto, playerIdToUse);
+  async createGame(@Body() createGameDto: CreateGameDto) {
+    const playerId = `player_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    try {
+      return await this.gameService.createGame(createGameDto, playerId);
+    } catch (e) {
+      throw new BadRequestException({ error: e.message || 'Kunne ikke opprette spill' });
+    }
   }
 
   @Post('join')
-  async joinGame(@Body() joinGameDto: JoinGameDto, @Headers('x-player-id') playerId?: string) {
-    const playerIdToUse = playerId || `player_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    return this.gameService.joinGame(joinGameDto, playerIdToUse);
+  async joinGame(@Body() joinGameDto: JoinGameDto) {
+    const playerId = `player_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    return this.gameService.joinGame(joinGameDto, playerId);
   }
 
   @Get(':code')
@@ -32,7 +36,7 @@ export class GameController {
     console.log(`📡 [Controller] Starting game: ${code}`);
     const result = await this.gameService.startGame(code);
     console.log(`📡 [Controller] Game started, result rounds:`, { count: result?.rounds?.length, first: result?.rounds?.[0] });
-    
+
     // Fetch updated game and broadcast to all players
     const game = await this.gameService.getGame(code);
     console.log(`📡 [Controller] Broadcasting, game rounds:`, { count: game?.rounds?.length, first: game?.rounds?.[0] });
@@ -40,7 +44,7 @@ export class GameController {
       this.gameGateway.broadcastToGamePublic(code, 'game-started', { game, round: game.rounds?.[0] });
       console.log(`📡 [Controller] Broadcasted game-started event`);
     }
-    
+
     return result;
   }
 
@@ -55,19 +59,19 @@ export class GameController {
     @Body() body: { gameCode: string; roundId: string; playerId: string; guess: string; timeElapsed: number },
   ) {
     const result = await this.gameService.submitAnswer(body.gameCode, body.roundId, body.playerId, body.guess, body.timeElapsed);
-    
+
     // Check if round has ended (all players answered)
     const game = await this.gameService.getGame(body.gameCode);
     if (game && game.status === 'ROUND_END') {
       console.log(`📡 [Controller] All players answered! Broadcasting round-end`);
       const currentRound = game.rounds?.find(r => r.id === body.roundId);
-      this.gameGateway.broadcastToGamePublic(body.gameCode, 'round-end', { 
+      this.gameGateway.broadcastToGamePublic(body.gameCode, 'round-end', {
         game,
         round: currentRound,
         players: game.players,
       });
     }
-    
+
     return result;
   }
 

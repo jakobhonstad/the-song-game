@@ -4,6 +4,10 @@ import { DatabaseModule } from './database/database.module';
 import { SongsModule } from './songs/songs.module';
 
 @Module({
-  imports: [GameModule, DatabaseModule, SongsModule],
+  imports: [
+    GameModule,
+    DatabaseModule,
+    SongsModule,
+  ],
 })
 export class AppModule { }
