@@ -50,7 +50,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (game) {
       // Send confirmation to the client that just joined
       console.log(`📡 [join-game] Emitting 'joined-game' to client ${client.id}`);
-      client.emit('joined-game', game);
+      client.emit('joined-game', { game });
       // Broadcast to all players in game that someone joined
       console.log(`📡 [join-game] Broadcasting 'player-joined' to all in room ${roomName}`);
       this.broadcastToGame(gameCode, 'player-joined', { game });
@@ -109,6 +109,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   // Public method for controller to broadcast events
+  // TODO: trengs egt denne funskjonen for å gjøre broadcastToGame tilgjenlig utenfor gateway?
   broadcastToGamePublic(gameCode: string, event: string, data: any) {
     this.broadcastToGame(gameCode, event, data);
   }

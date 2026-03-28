@@ -40,21 +40,17 @@ export default function GamePlay({ game, gameCode }: GamePlayProps) {
 
   const { searchResults, clearResults } = useSongSearch(guess, game.category);
 
-  const [hasTimedOut, setHasTimedOut] = useState(false);
-
   // Reset state on new round
   useEffect(() => {
     if (game.status === 'PLAYING') {
       setHasSubmitted(false);
       setGuess('');
       clearResults();
-      setHasTimedOut(false);
     }
   }, [currentRound?.id, game.status, clearResults]);
 
+  // When time runs out, send next-round with websocket to backend
   useEffect(() => {
-    if (!currentRound || game.status !== 'PLAYING') return;
-    if (!isHost || hasSubmitted || hasTimedOut) return;
     if (secondsRemaining > 0) return;
 
     const timeout = setTimeout(() => {
@@ -62,15 +58,15 @@ export default function GamePlay({ game, gameCode }: GamePlayProps) {
         type: 'next-round',
         gameCode,
       });
-      setHasTimedOut(true);
     }, 1000);
 
     return () => clearTimeout(timeout);
-  }, [currentRound, game.status, isHost, hasSubmitted, hasTimedOut, secondsRemaining, sendMessage, gameCode]);
+  });
 
   const handleSubmitAnswer = () => {
     if (!currentRound || !playerId || !guess.trim() || hasSubmitted) return;
 
+    // BUG: submit-answer finnes ikke i gateway, men answer-submitted gjør det
     sendMessage({
       type: 'submit-answer',
       roundId: currentRound.id,
@@ -125,7 +121,6 @@ export default function GamePlay({ game, gameCode }: GamePlayProps) {
       guess={guess}
       hasSubmitted={hasSubmitted}
       timeElapsed={timeElapsed}
-      //timeElapsed={timeElapsed}
       searchResults={searchResults}
       onGuessChange={setGuess}
       onSelectSuggestion={selectSuggestion}

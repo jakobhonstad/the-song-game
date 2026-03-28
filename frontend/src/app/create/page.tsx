@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useGameStore } from '@/lib/game-store';
+import { connectWebSocket } from '@/lib/game-socket';
 
 const categories = [
   { id: 'film', name: '🎬 Film', description: 'Temalåter fra kjente filmer' },
@@ -19,9 +20,18 @@ export default function CreateGame() {
   const [hostName, setHostName] = useState('');
 
   const handleCreateGame = async (e: React.FormEvent) => {
+    // Stops race condition
+    if (loading) return;
+
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    const trimmedHostName = hostName.trim();
+    if (!trimmedHostName) {
+      setError("Host name kan ikke være tomt")
+      return;
+    }
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/games`, {
@@ -29,13 +39,14 @@ export default function CreateGame() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           category: selectedCategory,
-          hostName,
+          hostName: trimmedHostName,
           maxRounds: 10,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Kunne ikke opprette spill');
+        const data = await response.json();
+        throw new Error(data.error || 'Kunne ikke opprette spill');
       }
 
       const data = await response.json();
@@ -46,13 +57,16 @@ export default function CreateGame() {
       localStorage.setItem('playerId', playerId);
       localStorage.setItem('playerName', hostName);
 
+      // Connect to websocket
+      await connectWebSocket(gameCode, playerId);
+
       // Set game in store before redirecting
       setGame(data);
 
       // Redirect to lobby
       router.push(`/game/${gameCode}`);
     } catch (err) {
-      setError('Noe gikk galt. Prøv igjen.');
+      setError(err instanceof Error ? err.message : 'Noe gikk galt. Prøv igjen.');
       console.error(err);
     } finally {
       setLoading(false);

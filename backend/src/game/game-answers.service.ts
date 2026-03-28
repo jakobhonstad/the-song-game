@@ -3,7 +3,7 @@ import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class GameAnswersService {
-  constructor(private prisma: DatabaseService) {}
+  constructor(private prisma: DatabaseService) { }
 
   async submitAnswer(gameCode: string, roundId: string, playerId: string, guess: string, timeElapsed: number) {
     const round = await this.prisma.round.findUnique({
