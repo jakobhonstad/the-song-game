@@ -1,7 +1,8 @@
+import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
+import { Pool } from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { searchDeezer } from '../src/utils/deezer';
-
-const prisma = new PrismaClient();
 
 const songs = [
   // Film soundtracks
@@ -15,7 +16,7 @@ const songs = [
   { title: 'A Whole New World', artist: 'Peabo Bryson & Regina Belle', category: 'film', movie: 'Aladdin' },
   { title: 'Shallow', artist: 'Lady Gaga & Bradley Cooper', category: 'film', movie: 'A Star Is Born' },
   { title: 'Lose Yourself', artist: 'Eminem', category: 'film', movie: '8 Mile' },
-  
+
   // TV series theme songs
   { title: 'Friends Theme', artist: 'The Rembrandts', category: 'tv', tvShow: 'Friends' },
   { title: 'Game of Thrones Theme', artist: 'Ramin Djawadi', category: 'tv', tvShow: 'Game of Thrones' },
@@ -29,6 +30,10 @@ const songs = [
   { title: 'Peaky Blinders Theme', artist: 'Nick Cave and the Bad Seeds', category: 'tv', tvShow: 'Peaky Blinders' },
 ];
 
+const connectionString = `${process.env.DATABASE_URL}`;
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('🎵 Start seeding songs with Deezer previews...');
@@ -36,9 +41,9 @@ async function main() {
   for (const song of songs) {
     // Search Deezer for the song
     const deezerData = await searchDeezer(song.title, song.artist);
-    
+
     const result = await prisma.song.upsert({
-      where: { 
+      where: {
         title_artist: {
           title: song.title,
           artist: song.artist,
@@ -62,9 +67,9 @@ async function main() {
         }),
       },
     });
-    
+
     console.log(`✅ ${song.title} by ${song.artist} ${deezerData?.previewUrl ? '(with Deezer preview)' : '(no preview found)'}`);
-    
+
     // Small delay to avoid rate limiting
     await new Promise(resolve => setTimeout(resolve, 200));
   }
