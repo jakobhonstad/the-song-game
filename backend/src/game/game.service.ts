@@ -16,12 +16,12 @@ export class GameService {
     private createService: GameCreateService,
   ) { }
 
-  async createGame(createGameDto: CreateGameDto, hostId: string) {
-    return this.createService.createGame(createGameDto, hostId);
+  async createGame(createGameDto: CreateGameDto) {
+    return this.createService.createGame(createGameDto);
   }
 
-  async joinGame(joinGameDto: JoinGameDto, playerId: string) {
-    return this.playersService.joinGame(joinGameDto, playerId);
+  async joinGame(joinGameDto: JoinGameDto) {
+    return this.playersService.joinGame(joinGameDto);
   }
 
   async getGame(code: string) {

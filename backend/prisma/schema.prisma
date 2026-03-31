@@ -12,66 +12,69 @@ datasource db {
 model Game {
   id           String   @id @default(cuid())
   code         String   @unique
-  hostId       String
   status       String   @default("LOBBY") // LOBBY, PLAYING, ROUND_END, FINISHED
   category     String   @default("film")
-  maxRounds    Int      @default(10)
-  currentRound Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  maxRounds    Int      @default(10)      @map("max_rounds")
+  currentRound Int      @default(0)       @map("current_round")
+  createdAt    DateTime @default(now())   @map("created_at")
+  updatedAt    DateTime @updatedAt        @map("updated_at")
 
   players Player[]
   rounds  Round[]
 
+  @@map("games")
   @@index([code])
 }
 
 model Player {
   id        String   @id @default(cuid())
-  gameId    String
+  gameId    String                         @map("game_id")
   name      String
-  isHost    Boolean  @default(false)
+  isHost    Boolean  @default(false)       @map("is_host")
   score     Int      @default(0)
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now())       @map("created_at")
 
   game    Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
   answers Answer[]
 
+  @@map("players")
   @@unique([gameId, name])
   @@index([gameId])
 }
 
 model Round {
   id          String   @id @default(cuid())
-  gameId      String
-  roundNumber Int
-  songId      String
-  songTitle   String
-  songArtist  String?
+  gameId      String                        @map("game_id")
+  roundNumber Int                           @map("round_number")
+  songId      String                        @map("song_id")
+  songTitle   String                        @map("song_title")
+  songArtist  String?                       @map("song_artist")
   category    String
-  previewUrl  String? // Song preview URL
-  createdAt   DateTime @default(now())
+  previewUrl  String?                       @map("preview_url")
+  createdAt   DateTime @default(now())      @map("created_at")
 
   game    Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
   answers Answer[]
 
+  @@map("rounds")
   @@unique([gameId, roundNumber])
   @@index([gameId])
 }
 
 model Answer {
   id          String   @id @default(cuid())
-  roundId     String
-  playerId    String
+  roundId     String                        @map("round_id")
+  playerId    String                        @map("player_id")
   guess       String
-  isCorrect   Boolean  @default(false)
+  isCorrect   Boolean  @default(false)      @map("is_correct")
   points      Int      @default(0)
-  timeElapsed Int // in milliseconds
-  createdAt   DateTime @default(now())
+  timeElapsed Int                           @map("time_elapsed")
+  createdAt   DateTime @default(now())      @map("created_at")
 
   round  Round  @relation(fields: [roundId], references: [id], onDelete: Cascade)
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
+  @@map("answers")
   @@unique([roundId, playerId])
   @@index([roundId])
   @@index([playerId])
@@ -82,12 +85,13 @@ model Song {
   title      String
   artist     String
   category   String
-  movie      String? // Film name if category is 'film'
-  tvShow     String? // TV show name if category is 'tv'
-  spotifyId  String?  @unique
-  previewUrl String? // Spotify 30-second preview URL
-  createdAt  DateTime @default(now())
+  movie      String?
+  tvShow     String?                        @map("tv_show")
+  spotifyId  String?  @unique               @map("spotify_id")
+  previewUrl String?                        @map("preview_url")
+  createdAt  DateTime @default(now())       @map("created_at")
 
+  @@map("songs")
   @@unique([title, artist])
   @@index([category])
   @@index([title])

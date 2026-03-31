@@ -6,7 +6,7 @@ import { JoinGameDto } from './dto/game.dto';
 export class GamePlayersService {
   constructor(private prisma: DatabaseService) { }
 
-  async joinGame(joinGameDto: JoinGameDto, playerId: string) {
+  async joinGame(joinGameDto: JoinGameDto) {
     const game = await this.prisma.game.findUnique({
       where: { code: joinGameDto.code },
       include: { players: true, rounds: true },
@@ -17,16 +17,18 @@ export class GamePlayersService {
     }
 
     // Check if player already joined
-    const existingPlayer = game.players.find((p) => p.id === playerId);
-    if (!existingPlayer) {
-      await this.prisma.player.create({
-        data: {
-          id: playerId,
-          gameId: game.id,
-          name: joinGameDto.playerName,
-        },
-      });
-    }
+    const existingPlayer = game.players.find(p => p.name === joinGameDto.playerName);
+
+    if (existingPlayer) {
+      throw new Error('Name already taken in this game');
+    };
+
+    await this.prisma.player.create({
+      data: {
+        gameId: game.id,
+        name: joinGameDto.playerName,
+      },
+    });
 
     // Fetch updated game with players
     return this.prisma.game.findUnique({

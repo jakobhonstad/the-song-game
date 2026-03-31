@@ -12,18 +12,17 @@ export class GameController {
 
   @Post()
   async createGame(@Body() createGameDto: CreateGameDto) {
-    const playerId = `player_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     try {
-      return await this.gameService.createGame(createGameDto, playerId);
+      return await this.gameService.createGame(createGameDto);
     } catch (e) {
+      console.error('❌ createGame error:', e);
       throw new BadRequestException({ error: e.message || 'Kunne ikke opprette spill' });
     }
   }
 
   @Post('join')
   async joinGame(@Body() joinGameDto: JoinGameDto) {
-    const playerId = `player_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    return this.gameService.joinGame(joinGameDto, playerId);
+    return this.gameService.joinGame(joinGameDto);
   }
 
   @Get(':code')

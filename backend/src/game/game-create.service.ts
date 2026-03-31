@@ -10,18 +10,16 @@ function generateGameCode(): string {
 export class GameCreateService {
   constructor(private prisma: DatabaseService) { }
 
-  async createGame(createGameDto: CreateGameDto, hostId: string) {
+  async createGame(createGameDto: CreateGameDto) {
     const code = generateGameCode();
 
     const game = await this.prisma.game.create({
       data: {
         code,
-        hostId,
         category: createGameDto.category,
         maxRounds: createGameDto.maxRounds || 10,
         players: {
           create: {
-            id: hostId,
             name: createGameDto.hostName,
             isHost: true,
           }

@@ -3,7 +3,6 @@ export interface Game {
   code: string;
   category: string;
   status: GameStatus;
-  hostId: string;
   currentRound: number;
   maxRounds: number;
   createdAt: string;

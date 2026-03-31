@@ -19,7 +19,7 @@ export default function CreateGame() {
   const [selectedCategory, setSelectedCategory] = useState('film');
   const [hostName, setHostName] = useState('');
 
-  const handleCreateGame = async (e: React.FormEvent) => {
+  const handleCreateGame = async (e: React.SyntheticEvent) => {
     // Stops race condition
     if (loading) return;
 

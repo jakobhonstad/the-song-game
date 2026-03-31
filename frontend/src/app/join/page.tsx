@@ -13,7 +13,7 @@ export default function JoinGame() {
   const [gameCode, setGameCode] = useState('');
   const [playerName, setPlayerName] = useState('');
 
-  const handleJoinGame = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleJoinGame = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
