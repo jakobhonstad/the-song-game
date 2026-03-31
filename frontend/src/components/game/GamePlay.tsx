@@ -66,7 +66,6 @@ export default function GamePlay({ game, gameCode }: GamePlayProps) {
   const handleSubmitAnswer = () => {
     if (!currentRound || !playerId || !guess.trim() || hasSubmitted) return;
 
-    // BUG: submit-answer finnes ikke i gateway, men answer-submitted gjør det
     sendMessage({
       type: 'answer-submitted',
       roundId: currentRound.id,

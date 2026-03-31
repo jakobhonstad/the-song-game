@@ -8,51 +8,21 @@ interface LobbyProps {
 
 export default function Lobby({ game, gameCode }: LobbyProps) {
   const [playerId, setPlayerId] = useState<string | null>(null);
-  const [isHost, setIsHost] = useState(false);
+  const [error, setError] = useState('');
+  const isHost = game.players.find(p => p.id === playerId)?.isHost || false;
 
   useEffect(() => {
     // Get playerId from localStorage as a fallback
     const id = localStorage.getItem('playerId');
     setPlayerId(id);
-
-    // check if player is host
-    const currentPlayer = game.players.find(p => p.id === id);
-    setIsHost(currentPlayer?.isHost ?? false);
-
-    // But also check if this player is in the game.players list
-    if (game.players && game.players.length > 0) {
-      // Try to find this player in the game
-      let foundPlayer = null;
-      if (id) {
-        foundPlayer = game.players.find(p => p.id === id);
-      }
-
-      // If not found by ID, use the first player (for single tab)
-      if (!foundPlayer && game.players.length > 0) {
-        foundPlayer = game.players[0];
-      }
-
-      // Check if found player is host
-      const hostStatus = isHost;
-
-      console.log('Lobby - playerId from localStorage:', id);
-      console.log('Lobby - game.players:', game.players);
-      console.log('Lobby - foundPlayer:', foundPlayer);
-      console.log('Lobby - isHost:', hostStatus);
-    }
   }, [game, game.players]);
 
   const handleStartGame = async () => {
-    try {
-      console.log('🎮 [LOBBY] Button clicked - Starting game');
-      console.log('🎮 [LOBBY] isHost:', isHost);
-      console.log('🎮 [LOBBY] playerId:', playerId);
-      console.log('🎮 [LOBBY] gameCode:', gameCode);
-      console.log('🎮 [LOBBY] game.players.length:', game.players.length);
+    setError('');
 
+    try {
       if (!isHost) {
-        console.error('❌ [LOBBY] Not host, cannot start game');
-        alert('Bare verten kan starte spillet');
+        setError('Bare host kan starte spillet');
         return;
       }
       /*
@@ -61,30 +31,26 @@ export default function Lobby({ game, gameCode }: LobbyProps) {
       Isåfall må man legge til en funskjon som sier hva svaret er etter hver runde.
       */
       if (game.players.length < 1) {
-        console.error('❌ [LOBBY] Not enough players');
-        alert('Trenger minst 1 spiller');
+        setError('Ikke nok spillere');
         return;
       }
 
       const url = `${process.env.NEXT_PUBLIC_API_URL}/api/games/${gameCode}/start`;
-      console.log('🎮 [LOBBY] Fetching:', url);
 
       const response = await fetch(url, {
         method: 'POST',
       });
 
-      console.log('🎮 [LOBBY] Response status:', response.status);
 
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || `HTTP ${response.status}: Kunne ikke starte spillet`);
       }
 
-      console.log('✅ [LOBBY] Game started successfully');
       // Game status should update via WebSocket event, no need to do anything here
-    } catch (error) {
-      console.error('❌ [LOBBY] Error starting game:', error);
-      alert(error instanceof Error ? error.message : 'Kunne ikke starte spillet');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Klarer ikke starte spill');
+      console.error(err);
     }
   };
 

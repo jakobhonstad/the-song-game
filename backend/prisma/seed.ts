@@ -22,7 +22,7 @@ const songs = [
   { title: 'Game of Thrones Theme', artist: 'Ramin Djawadi', category: 'tv', tvShow: 'Game of Thrones' },
   { title: 'The Simpsons Theme', artist: 'Danny Elfman', category: 'tv', tvShow: 'The Simpsons' },
   { title: 'Breaking Bad Theme', artist: 'Dave Porter', category: 'tv', tvShow: 'Breaking Bad' },
-  { title: 'Stranger Things Theme', artist: 'Kyle Dixon & Michael Stein', category: 'tv', tvShow: 'Stranger Things' },
+  { title: 'Stranger Things Theme', artist: 'TV Sounds Unlimited', category: 'tv', tvShow: 'Stranger Things' },
   { title: 'The Office Theme', artist: 'Jay Ferguson', category: 'tv', tvShow: 'The Office' },
   { title: 'How I Met Your Mother Theme', artist: 'The Solids', category: 'tv', tvShow: 'How I Met Your Mother' },
   { title: 'Westworld Theme', artist: 'Ramin Djawadi', category: 'tv', tvShow: 'Westworld' },
