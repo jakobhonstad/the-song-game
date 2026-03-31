@@ -68,11 +68,12 @@ export default function GamePlay({ game, gameCode }: GamePlayProps) {
 
     // BUG: submit-answer finnes ikke i gateway, men answer-submitted gjør det
     sendMessage({
-      type: 'submit-answer',
+      type: 'answer-submitted',
       roundId: currentRound.id,
       playerId,
       guess: guess.trim(),
       timeElapsed,
+      gameCode,
     });
 
     setHasSubmitted(true);

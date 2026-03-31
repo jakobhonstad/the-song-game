@@ -68,12 +68,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('answer-submitted')
   async handleAnswerSubmitted(
-    @MessageBody() data: { gameCode: string; roundId: string },
+    @MessageBody() data: { gameCode: string; roundId: string; playerId: string; guess: string; timeElapsed: number },
     @ConnectedSocket() client: Socket,
   ) {
     const { gameCode } = data;
     const game = await this.gameService.getGame(gameCode);
     if (game) {
+      this.gameService.submitAnswer(gameCode, data.roundId, data.playerId, data.guess, data.timeElapsed)
       this.broadcastToGame(gameCode, 'answer-submitted', { game });
     }
   }
