@@ -14,85 +14,117 @@ model Game {
   code         String   @unique
   status       String   @default("LOBBY") // LOBBY, PLAYING, ROUND_END, FINISHED
   category     String   @default("film")
-  maxRounds    Int      @default(10)      @map("max_rounds")
-  currentRound Int      @default(0)       @map("current_round")
-  createdAt    DateTime @default(now())   @map("created_at")
-  updatedAt    DateTime @updatedAt        @map("updated_at")
+  maxRounds    Int      @default(10) @map("max_rounds")
+  currentRound Int      @default(0) @map("current_round")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   players Player[]
   rounds  Round[]
 
-  @@map("games")
   @@index([code])
+  @@map("games")
 }
 
 model Player {
   id        String   @id @default(cuid())
-  gameId    String                         @map("game_id")
+  gameId    String   @map("game_id")
   name      String
-  isHost    Boolean  @default(false)       @map("is_host")
+  isHost    Boolean  @default(false) @map("is_host")
   score     Int      @default(0)
-  createdAt DateTime @default(now())       @map("created_at")
+  createdAt DateTime @default(now()) @map("created_at")
 
   game    Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
   answers Answer[]
 
-  @@map("players")
   @@unique([gameId, name])
   @@index([gameId])
+  @@map("players")
 }
 
 model Round {
   id          String   @id @default(cuid())
-  gameId      String                        @map("game_id")
-  roundNumber Int                           @map("round_number")
-  songId      String                        @map("song_id")
-  songTitle   String                        @map("song_title")
-  songArtist  String?                       @map("song_artist")
+  gameId      String   @map("game_id")
+  roundNumber Int      @map("round_number")
+  songId      String   @map("song_id")
+  songTitle   String   @map("song_title")
+  songArtist  String?  @map("song_artist")
   category    String
-  previewUrl  String?                       @map("preview_url")
-  createdAt   DateTime @default(now())      @map("created_at")
+  previewUrl  String?  @map("preview_url")
+  createdAt   DateTime @default(now()) @map("created_at")
 
   game    Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
   answers Answer[]
 
-  @@map("rounds")
   @@unique([gameId, roundNumber])
   @@index([gameId])
+  @@map("rounds")
 }
 
 model Answer {
   id          String   @id @default(cuid())
-  roundId     String                        @map("round_id")
-  playerId    String                        @map("player_id")
+  roundId     String   @map("round_id")
+  playerId    String   @map("player_id")
   guess       String
-  isCorrect   Boolean  @default(false)      @map("is_correct")
+  isCorrect   Boolean  @default(false) @map("is_correct")
   points      Int      @default(0)
-  timeElapsed Int                           @map("time_elapsed")
-  createdAt   DateTime @default(now())      @map("created_at")
+  timeElapsed Int      @map("time_elapsed")
+  createdAt   DateTime @default(now()) @map("created_at")
 
   round  Round  @relation(fields: [roundId], references: [id], onDelete: Cascade)
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
-  @@map("answers")
   @@unique([roundId, playerId])
   @@index([roundId])
   @@index([playerId])
+  @@map("answers")
 }
 
-model Song {
-  id         String   @id @default(cuid())
-  title      String
-  artist     String
-  category   String
-  movie      String?
-  tvShow     String?                        @map("tv_show")
-  spotifyId  String?  @unique               @map("spotify_id")
-  previewUrl String?                        @map("preview_url")
-  createdAt  DateTime @default(now())       @map("created_at")
+// model Song {
+//   id         Int      @id @default(autoincrement())
+//   title      String
+//   artist     String
+//   category   String
+//   movie      String?
+//   tvShow     String?  @map("tv_show")
+//   spotifyId  String?  @unique @map("spotify_id")
+//   previewUrl String?  @map("preview_url")
+//   createdAt  DateTime @default(now()) @map("created_at")
 
-  @@map("songs")
+//   @@unique([title, artist])
+//   @@index([category])
+//   @@index([title])
+//   @@map("songs")
+// }
+
+model Song {
+  id             Int            @id @default(autoincrement())
+  title          String
+  artist         String
+  previewUrl     String?        @map("preview_url")
+  songCategories SongCategory[]
+
   @@unique([title, artist])
-  @@index([category])
-  @@index([title])
+  @@map("songs")
+}
+
+model Category {
+  id             Int            @id @default(autoincrement())
+  category       String
+  songCategories SongCategory[]
+
+  @@unique([category])
+  @@map("categories")
+}
+
+model SongCategory {
+  id                  Int     @id @default(autoincrement())
+  songId              Int     @map("song_id")
+  categoryId          Int     @map("category_id")
+  categoryDescription String? @map("category_description")
+
+  song     Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@map("song_categories")
 }
