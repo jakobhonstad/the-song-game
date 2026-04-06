@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { searchDeezer } from 'src/utils/deezer';
 
@@ -19,9 +19,24 @@ export class GameRoundsService {
     // Get random songs for the rounds
     // update this function to get random songs
     // might have to use raqSQL to accomplish this
+    const currentCategory = await this.prisma.category.findFirst({
+      where: {
+        category: game.category
+      }
+    });
+
+    if (!currentCategory) {
+      throw new NotFoundException(`Kategori '${game.category}' finnes ikke`);
+    };
+
     const songs = await this.prisma.song.findMany({
-      where: { category: game.category },
-      take: game.maxRounds,
+      where: {
+        songCategories: {
+          some: {
+            categoryId: currentCategory.id
+          }
+        }
+      }
     });
 
     console.log(`🎵 [startGame] Found ${songs.length} songs for category "${game.category}"`);
@@ -30,6 +45,9 @@ export class GameRoundsService {
       throw new Error(`No songs found for category "${game.category}". Make sure songs are seeded in the database.`);
     }
 
+    const shuffled = songs.sort(() => Math.random() - 0.5);
+    const selectedSongs = shuffled.slice(0, game.maxRounds);
+
     // Update game status
     await this.prisma.game.update({
       where: { id: game.id },
@@ -37,9 +55,10 @@ export class GameRoundsService {
     });
 
     // Create rounds with songs
+    // burde jeg ha noe annet en any her? kanskje lage en type
     const rounds: any[] = [];
     for (let i = 0; i < songs.length; i++) {
-      const song = songs[i];
+      const song = selectedSongs[i];
       const freshData = await searchDeezer(song.title, song.artist);
       const round = await this.prisma.round.create({
         data: {
@@ -48,8 +67,8 @@ export class GameRoundsService {
           songId: song.id,
           songTitle: song.title,
           songArtist: song.artist,
-          category: song.category,
-          previewUrl: freshData?.previewUrl || null,
+          category: currentCategory.category,
+          previewUrl: freshData?.previewUrl || song.previewUrl,
         },
       });
       rounds.push(round);

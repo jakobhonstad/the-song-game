@@ -18,21 +18,32 @@ export class GameAnswersService {
     // Determine correct answer based on category
     let correctAnswer = round.songTitle;
 
+    const songCategory = await this.prisma.songCategory.findFirst({
+      where: {
+        songId: round.songId,
+        category: { category: round.category }
+      },
+    });
+
+    if (songCategory?.categoryDescription) {
+      correctAnswer = songCategory.categoryDescription;
+    };
+
     // For film category: check against movie name
     // For tv category: check against TV show name
-    if (round.category === 'film' || round.category === 'tv') {
-      const song = await this.prisma.song.findUnique({
-        where: { id: round.songId },
-      });
+    // if (round.category === 'film' || round.category === 'tv') {
+    //   const song = await this.prisma.song.findUnique({
+    //     where: { id: round.songId },
+    //   });
 
-      if (song) {
-        if (round.category === 'film' && song.movie) {
-          correctAnswer = song.movie;
-        } else if (round.category === 'tv' && song.tvShow) {
-          correctAnswer = song.tvShow;
-        }
-      }
-    }
+    //   if (song) {
+    //     if (round.category === 'film' && song.movie) {
+    //       correctAnswer = song.movie;
+    //     } else if (round.category === 'tv' && song.tvShow) {
+    //       correctAnswer = song.tvShow;
+    //     }
+    //   }
+    // }
 
     // Check if guess is correct (case-insensitive, fuzzy matching)
     const correctLower = correctAnswer.toLowerCase().trim();

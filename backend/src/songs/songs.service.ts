@@ -3,38 +3,27 @@ import { DatabaseService } from '../database/database.service';
 
 @Injectable()
 export class SongsService {
-  constructor(private prisma: DatabaseService) {}
+  constructor(private prisma: DatabaseService) { }
 
   async search(query: string, category?: string) {
-    // For film category: search by movie name
-    // For tv category: search by TV show name
-    // Otherwise: search by song title
-    let where: any = {
-      ...(category && { category }),
-    };
-
-    if (category === 'film') {
-      where.movie = {
-        contains: query,
-        mode: 'insensitive' as const,
-      };
-    } else if (category === 'tv') {
-      where.tvShow = {
-        contains: query,
-        mode: 'insensitive' as const,
-      };
-    } else {
-      where.title = {
-        contains: query,
-        mode: 'insensitive' as const,
-      };
-    }
-
-    const songs = await this.prisma.song.findMany({
-      where,
+    // Search for songs matching query
+    const songCategories = await this.prisma.songCategory.findMany({
+      where: {
+        categoryDescription: { contains: query, mode: "insensitive" },
+        category: { category }
+      },
+      include: { song: true },
       take: 10,
     });
 
-    return { results: songs };
+    const results = songCategories.map(sc => ({
+      id: String(sc.song.id),
+      title: sc.categoryDescription,
+      artist: sc.song.artist,
+    }));
+
+
+
+    return { results };
   }
 }
