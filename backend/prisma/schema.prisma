@@ -46,7 +46,7 @@ model Round {
   id          String   @id @default(cuid())
   gameId      String   @map("game_id")
   roundNumber Int      @map("round_number")
-  songId      String   @map("song_id")
+  songId      Int      @map("song_id")
   songTitle   String   @map("song_title")
   songArtist  String?  @map("song_artist")
   category    String
