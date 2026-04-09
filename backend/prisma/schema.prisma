@@ -9,10 +9,17 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Status {
+  LOBBY
+  PLAYING
+  ROUND_END
+  FINISHED
+}
+
 model Game {
   id           String   @id @default(cuid())
   code         String   @unique
-  status       String   @default("LOBBY") // LOBBY, PLAYING, ROUND_END, FINISHED
+  status       Status   @default(LOBBY) // LOBBY, PLAYING, ROUND_END, FINISHED
   category     String   @default("film")
   maxRounds    Int      @default(10) @map("max_rounds")
   currentRound Int      @default(0) @map("current_round")

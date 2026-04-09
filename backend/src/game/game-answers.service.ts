@@ -29,22 +29,6 @@ export class GameAnswersService {
       correctAnswer = songCategory.categoryDescription;
     };
 
-    // For film category: check against movie name
-    // For tv category: check against TV show name
-    // if (round.category === 'film' || round.category === 'tv') {
-    //   const song = await this.prisma.song.findUnique({
-    //     where: { id: round.songId },
-    //   });
-
-    //   if (song) {
-    //     if (round.category === 'film' && song.movie) {
-    //       correctAnswer = song.movie;
-    //     } else if (round.category === 'tv' && song.tvShow) {
-    //       correctAnswer = song.tvShow;
-    //     }
-    //   }
-    // }
-
     // Check if guess is correct (case-insensitive, fuzzy matching)
     const correctLower = correctAnswer.toLowerCase().trim();
     const guessLower = guess.toLowerCase().trim();
@@ -67,10 +51,12 @@ export class GameAnswersService {
     });
 
     // Update player score
-    await this.prisma.player.update({
-      where: { id: playerId },
-      data: { score: { increment: points } },
-    });
+    if (isCorrect) {
+      await this.prisma.player.update({
+        where: { id: playerId },
+        data: { score: { increment: points } },
+      });
+    };
 
     // Check if all players have answered
     const allAnswers = await this.prisma.answer.findMany({

@@ -13,6 +13,7 @@ export class SongsService {
         category: { category }
       },
       include: { song: true },
+      distinct: ['songId'],
       take: 10,
     });
 

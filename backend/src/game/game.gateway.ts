@@ -1,22 +1,28 @@
 import {
   WebSocketGateway,
+  WebSocketServer,
   SubscribeMessage,
   MessageBody,
   ConnectedSocket,
   OnGatewayConnection,
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
+import { Socket, Server } from 'socket.io';
 import { GameService } from '../game/game.service';
+import { forwardRef, Inject } from '@nestjs/common';
 
 @WebSocketGateway({
   cors: { origin: '*' },
   transports: ['websocket'],
 })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  private gameConnections = new Map<string, Set<Socket>>();
+  @WebSocketServer()
+  server: Server;
 
-  constructor(private gameService: GameService) { }
+  constructor(
+    @Inject(forwardRef(() => GameService))
+    private gameService: GameService
+  ) { }
 
   handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
@@ -25,7 +31,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleDisconnect(client: Socket) {
     console.log(`Client disconnected: ${client.id}`);
-    this.gameConnections.forEach((clients) => clients.delete(client));
   }
 
   @SubscribeMessage('join-game')
@@ -35,13 +40,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Add client to game room
     const roomName = `game-${gameCode}`;
-    if (!this.gameConnections.has(gameCode)) {
-      this.gameConnections.set(gameCode, new Set());
-    }
-    const connections = this.gameConnections.get(gameCode);
-    if (connections) {
-      connections.add(client);
-    }
     client.join(roomName);
 
     // Get current game state
@@ -99,19 +97,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.broadcastToGame(gameCode, 'next-round', { game, round });
   }
 
-  private broadcastToGame(gameCode: string, event: string, data: any) {
+  public broadcastToGame(gameCode: string, event: string, data: any) {
     const roomName = `game-${gameCode}`;
-    const clients = this.gameConnections.get(gameCode);
-    if (clients) {
-      clients.forEach((client) => {
-        client.emit(event, data);
-      });
-    }
-  }
-
-  // Public method for controller to broadcast events
-  // TODO: trengs egt denne funskjonen for å gjøre broadcastToGame tilgjenlig utenfor gateway?
-  broadcastToGamePublic(gameCode: string, event: string, data: any) {
-    this.broadcastToGame(gameCode, event, data);
+    this.server.to(roomName).emit(event, data);
   }
 }
